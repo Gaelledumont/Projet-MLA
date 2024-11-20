@@ -12,7 +12,7 @@ class MultiHeadSelfAttention(nn.Module):
         batch_size (int): Batch size of the input tensor.
         qkv_bias (bool, optional): Whether to include a bias term in the Q, K, and V linear layers. Default is False.
     """     
-    def __init__(self, device, num_heads, dim, batch_size, qkv_bias=False):
+    def __init__(self, device, dim, batch_size, num_heads=12, qkv_bias=False):
         super().__init__()
         self.device = device
         self.num_heads = num_heads
