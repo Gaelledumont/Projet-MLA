@@ -1,5 +1,11 @@
 import torch
 
+
+"""WWM is implemented by first randomly sampling 15% of the words in the sequence and then considering all subword tokens in each of this 15% 
+for candidate replacement. This amounts to a proportion of selected tokens that is close to the original 15%. These tokens are then either replaced by
+<MASK> tokens (80%), left unchanged (10%) or replaced by a random token.
+"""
+
 def MLM(tokens, tokenizer,  choose_prob=0.15, mask_prob=0.8, random_prob=0.1):
     labels = tokens.clone # On conserve les tokens originaux pour la loss
 
@@ -14,5 +20,7 @@ def MLM(tokens, tokenizer,  choose_prob=0.15, mask_prob=0.8, random_prob=0.1):
 
     random_words = torch.randint(len(tokenizer), tokens.shape, dtype=torch.long)
     tokens[random_tokens] = random_words[random_tokens] # On remplace par tokens aléatoires
+
+    labels[~(mask_tokens | random_tokens)] = -100 # les tokens qui ne sont pas masqués ou changés sont mis à -100 pour être ignorés dans la loss
 
     return tokens, labels
