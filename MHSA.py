@@ -1,6 +1,12 @@
 import torch
 import torch.nn as nn
 
+
+"""l'attention c'est ce qui dit au modèle 'concentre toi la dessu s'cest important' c'est calculé grâce à 3 matries : Queries, Keys et Values
++ de détails slides 70-72 dans el cours d'Obin
+ou https://medium.com/@geetkal67/attention-networks-a-simple-way-to-understand-self-attention-f5fb363c736d
+"""
+
 #the number of attention heads must evenly divide the number of channels
 class MultiHeadSelfAttention(nn.Module):   
     """
