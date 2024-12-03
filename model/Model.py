@@ -13,7 +13,3 @@ class Model(nn.Module):
         x = self.embedding(input_ids)
         x = self.transformer(x)
         return x
-
-
-
-# Loss : CrossEntropy
