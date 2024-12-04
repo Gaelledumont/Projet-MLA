@@ -3,52 +3,95 @@
 Taches à accomplir : (Je vais ajouter du contenu à cette section entre aujourd'hui et demain - le temps de lire l'article plusieurs fois et comprendre les methodologies)
 -Oriane
 
-# Lecture et compréhension approfondie de l'article :
+# Reproduction du modèle CamemBERT
 
-    Identifier clairement l'architecture du réseau neuronal (RoBERTa).
-    Étudier les tâches d'évaluation utilisées (POS tagging, parsing, NER, NLI).
+Ce projet vise à reproduire les résultats expérimentaux de l'article *CamemBERT: a Tasty French Language Model*. Il s'agit d'implémenter en TensorFlow ou PyTorch l'architecture proposée et de valider ses performances sur plusieurs tâches NLP en utilisant un GPU.
 
-# Configuration de l'environnement de développement :
+---
 
-    Installer TensorFlow et PyTorch.
-    Configurer l'utilisation du GPU avec CUDA/cuDNN.
+## 📋 **Objectifs du projet :**
+- Implémenter l'architecture CamemBERT (basée sur RoBERTa) pour le français.
+- Entraîner le modèle sur des corpus diversifiés (OSCAR).
+- Évaluer les performances sur des tâches de NLP : POS tagging, parsing, NER, et NLI.
+- Comparer les résultats avec ceux de l'article original.
 
-# Collecte et prétraitement des données :
+---
 
-    Télécharger le corpus OSCAR (ou CCNet) en français.
-    Nettoyer et tokeniser les données avec SentencePiece.
+## 🛠️ **Prérequis :**
+### **Environnement de développement :**
+- **Langages** : Python 3.8+
+- **Frameworks** : TensorFlow / PyTorch
+- **GPU** : CUDA / cuDNN installés pour l'accélération matérielle
 
-# Implémentation du modèle neuronal :
+### **Bibliothèques nécessaires :**
+```bash
+pip install torch torchvision transformers
+pip install tensorflow
+pip install sentencepiece
+```
 
-    Reproduire l'architecture RoBERTa en utilisant TensorFlow ou PyTorch.
-    Implémenter le masquage dynamique de mots entiers.
+---
 
-# Entraînement du modèle :
+## 📂 **Structure du projet :**
+```plaintext
+CamemBERT-Reproduction/
+│
+├── data/                  # Données prétraitées (OSCAR, CCNet, etc.)
+├── models/                # Enregistrements des modèles entraînés
+├── scripts/               # Scripts d'entraînement et d'évaluation
+├── notebooks/             # Analyse des résultats et visualisations
+├── report/                # Rapport LaTeX (6-8 pages)
+└── README.md              # Documentation du projet
+```
 
-    Définir l'objectif de prédiction de mots masqués (MLM).
-    Lancer l'entraînement sur un corpus de 4 Go, puis de 138 Go.
-    Utiliser des techniques d'optimisation comme l'Adam avec warm-up et decay.
+---
 
-# Évaluation du modèle sur des tâches aval :
+## 🚀 **Étapes de reproduction :**
 
-    Implémenter et tester les tâches POS tagging, parsing, NER, et NLI.
-    Comparer les résultats avec les benchmarks existants.
+### 1. **Prétraitement des données :**
+- Télécharger le corpus OSCAR français.
+- Nettoyer et tokenizer avec **SentencePiece**.
+  
+### 2. **Implémentation du modèle :**
+- Reproduire l'architecture RoBERTa en utilisant TensorFlow ou PyTorch.
+- Implémenter le masquage dynamique des mots entiers (Whole-Word Masking).
 
-# Analyse comparative :
+### 3. **Entraînement :**
+- Configurer l'objectif de **Masked Language Modeling (MLM)**.
+- Lancer l'entraînement sur un GPU avec des données de 4 Go et 138 Go :
+  ```bash
+  python train.py --data_path data/oscar_4gb.txt --epochs 10 --batch_size 32
+  ```
 
-    Analyser les différences de performances entre les corpus de 4 Go et 138 Go.
-    Comparer avec les modèles de référence (mBERT, XLM-R).
+### 4. **Évaluation sur des tâches aval :**
+- Implémenter les tâches POS tagging, NER, parsing, et NLI.
+- Utiliser des benchmarks comme **Universal Dependencies (UD)** et **XNLI** :
+  ```bash
+  python evaluate.py --task pos_tagging --model_path models/camembert_base.pt
+  ```
 
-# Rédaction du rapport LaTeX (6-8 pages) :
+### 5. **Comparaison des résultats :**
+- Comparer les performances avec les modèles existants (**mBERT**, **XLM-R**).
+- Analyser l'impact de la taille et de l'origine du corpus sur les résultats.
 
-    Introduction et contexte.
-    Description de l'architecture ré-implémentée.
-    Détails sur les bases de données utilisées et les différences avec l'article.
-    Présentation des résultats expérimentaux et comparaison.
-    Discussion critique des résultats obtenus.
+### 6. **Rédaction du rapport LaTeX :**
+- Présenter l'architecture, les différences avec l'article, et les résultats obtenus.
+- Justifier les choix de conception et discuter les résultats expérimentaux.
 
-# Création de la vidéo de présentation (5 minutes) :
+### 7. **Création de la vidéo de présentation :**
+- Enregistrer une vidéo de 5 minutes expliquant le projet et les résultats.
+  - **Tous les participants doivent prendre la parole.**
 
-    Préparer un script clair et concis.
-    Créer une présentation PowerPoint.
-    Enregistrer la vidéo avec tous les participants prenant la parole.
+---
+
+## 📈 **Résultats attendus :**
+- Reproduction fidèle des résultats de l'article.
+- Validation des performances sur différentes tâches NLP.
+- Comparaison critique des performances avec les modèles de référence.
+
+---
+
+## 💡 **Ressources utiles :**
+- [Article CamemBERT](https://arxiv.org/abs/1911.03894)
+- [Corpus OSCAR](https://oscar-corpus.com/)
+- [Documentation Hugging Face](https://huggingface.co/docs)
