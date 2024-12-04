@@ -1,8 +1,5 @@
 # Projet-MLA
 
-Taches à accomplir : (Je vais ajouter du contenu à cette section entre aujourd'hui et demain - le temps de lire l'article plusieurs fois et comprendre les methodologies)
--Oriane
-
 # Reproduction du modèle CamemBERT
 
 Ce projet vise à reproduire les résultats expérimentaux de l'article *CamemBERT: a Tasty French Language Model*. Il s'agit d'implémenter en TensorFlow ou PyTorch l'architecture proposée et de valider ses performances sur plusieurs tâches NLP en utilisant un GPU.
