@@ -24,3 +24,5 @@ def MLM(tokens, tokenizer,  choose_prob=0.15, mask_prob=0.8, random_prob=0.1):
     labels[~(mask_tokens | random_tokens)] = -100 # les tokens qui ne sont pas masqués ou changés sont mis à -100 pour être ignorés dans la loss
 
     return tokens, labels
+
+# TOKENS SPECIAUX !!!!
