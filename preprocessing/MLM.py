@@ -25,4 +25,4 @@ def MLM(tokens, tokenizer,  choose_prob=0.15, mask_prob=0.8, random_prob=0.1):
 
     return tokens, labels
 
-# TOKENS SPECIAUX !!!!
+# TOKENS SPECIAUX !!!
