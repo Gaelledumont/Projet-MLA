@@ -1,5 +1,5 @@
 import torch
-import torch as nn
+import torch.nn as nn
 from MHSA import MultiHeadSelfAttention
 from FFN import FFN
 
