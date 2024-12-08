@@ -31,14 +31,6 @@ class CamemBERTEmbedding(nn.Module):
         embeddings = self.dropout(embeddings)
 
         return embeddings
-"""
-In order to ob-
-tain a representation for a given token, we first
-compute the average of each sub-word's represen-
-tations in the last four layers of the Transformer,
-and then average the resulting sub-word vectors."""
-
-
 
 
 
