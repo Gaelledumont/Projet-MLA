@@ -9,7 +9,13 @@ for candidate replacement. This amounts to a proportion of selected tokens that 
 def MLM(tokens, tokenizer,  choose_prob=0.15, mask_prob=0.8, random_prob=0.1):
     labels = tokens.clone # On conserve les tokens originaux pour la loss
 
-    chosen_tokens = torch.randn(tokens.shape) < choose_prob  # On choisit 15% des tokens 
+    # Obtenir les indices des tokens spéciaux : [CLS], [PAD], [SEP], [UNK] et [MASK]
+    special_tokens = [tokenizer.cls_token_id, tokenizer.sep_token_id, tokenizer.pad_token_id, tokenizer.unk_token_id, tokenizer.mask_token_id]
+
+    # Marquer les tokens spéciaux pour qu'ils ne soient pas choisis
+    non_maskable_tokens = torch.isin(tokens, torch.tensor(special_tokens, device=tokens.device))
+
+    chosen_tokens = (torch.randn(tokens.shape) < choose_prob) & ~non_maskable_tokens  # On choisit 15% des tokens en ignorant les spéciaux
 
     random_values = torch.rand(chosen_tokens.shape)  # On assigne une valeur aléatoire pour chaque token
 
@@ -24,5 +30,3 @@ def MLM(tokens, tokenizer,  choose_prob=0.15, mask_prob=0.8, random_prob=0.1):
     labels[~(mask_tokens | random_tokens)] = -100 # les tokens qui ne sont pas masqués ou changés sont mis à -100 pour être ignorés dans la loss
 
     return tokens, labels
-
-# TOKENS SPECIAUX !!!
