@@ -12,7 +12,7 @@ class CamemBERTEmbedding(nn.Module):
     max_len (int) : longueur max de la séquence d'entrée (x)
     embedding_dim (int) : the size of each embedding vector
     """
-    def __init__(self, vocab_size, max_len, embed_dim=512, dropout=0.1):
+    def __init__(self, vocab_size, max_len, embed_dim=768, dropout=0.1):
         super(CamemBERTEmbedding, self).__init__()
         self.token_embedding = nn.Embedding(vocab_size, embed_dim) # vecteur qui possède le 'sens' du mot
         self.position_embedding = nn.Embedding(max_len, embed_dim) # vecteur qui possède la position du mot
