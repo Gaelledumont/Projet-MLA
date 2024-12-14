@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import math
 
 
 """l'attention c'est ce qui dit au modèle 'concentre toi la dessu s'cest important' c'est calculé grâce à 3 matries : Queries, Keys et Values
@@ -18,34 +19,36 @@ class MultiHeadSelfAttention(nn.Module):
         batch_size (int): Batch size of the input tensor.
         qkv_bias (bool, optional): Whether to include a bias term in the Q, K, and V linear layers. Default is False.
     """     
-    def __init__(self, device, dim, batch_size, num_heads=12, qkv_bias=False):
+    def __init__(self, device, dim, num_heads=12, dropout=0.1):
         super().__init__()
-        self.device = device
         self.num_heads = num_heads
         self.dim = dim
-        self.head_dim = int(dim / num_heads)
+        self.head_dim = dim // num_heads
 
         self.scale = self.head_dim ** -0.5    
-        self.qkv = nn.Linear(dim, dim*3, bias=qkv_bias) #Queries, Keys, Values
-        self.batch_size = batch_size
-        self.proj = nn.Linear(dim, dim) 
+        self.qkv = nn.Linear(dim, dim*3, bias=True) #Queries, Keys, Values
+        self.proj = nn.Linear(dim, dim)
+        self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x):
+    def forward(self, x, attention_mask=None):
+        # x: (batch, seq_len, dim)
+        batch_size, seq_len, _ = x.size()
+        qkv = self.qkv(x).reshape(batch_size, seq_len, 3, self.num_heads, self.head_dim)
+        q, k, v = qkv.unbind(dim=2)  # Shapes: (batch_size, num_heads, N, head_dim)
 
-        x = x.to(self.device)
+        q = q.transpose(1, 2) # [batch, num_heads, seq_len, head_dim)
+        k = k.transpose(1, 2)
+        v = v.transpose(1, 2)
 
-        batch_size, num_tokens, channels = x.shape
-        qkv = self.qkv(x)  # Shape: (batch_size, N, 3 * dim)
-        
-        qkv = qkv.to(self.device).view(3, batch_size, self.num_heads, num_tokens, self.head_dim)  # Shape: (batch_size, N, 3, num_heads, head_dim)
-        q, k, v = qkv[0], qkv[1], qkv[2]  # Shapes: (batch_size, num_heads, N, head_dim)
-        
-        attn = (q * self.scale) @ k.transpose(-2, -1) 
+        attn = (q * self.scale) @ k.transpose(-1, -2) # [batch, num_heads, seq_len, seq_len]
+        if attention_mask is not None:
+            attn += attention_mask
 
         attn = attn.softmax(dim=-1)
-        
-        x = (attn @ v).transpose(1,2).reshape(batch_size, num_tokens, channels).to(self.device)
+        attn = self.dropout(attn)
 
-        x = self.proj(x)
+        out = attn @ v # [batch, num_heads, seq_len, head_dim)
+        out = out.transpose(1,2).contigous().reshape(batch_size, seq_len, self.dim)
+        out = self.proj(out)
 
-        return x
+        return out
