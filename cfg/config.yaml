@@ -1,16 +1,32 @@
 train:
   tune:
+    num_epochs: 50
+    lr: 7e-4
+    warmup_steps: 10000
+    total_steps: 100000 # nombre total d'étapes d'entraînement
+    end_learning_rate: 0.0
+    power: 1.0
 
-    num_epochs : 50
-    lr : 0.1
+model:
+    vocab_size: 32000
+    max_len: 512
+    hidden_dim: 768
+    num_heads: 12
+    num_layers: 12
+    dropout: 0.1
+    intermediate_size: 3072
+    pad_token_id: 1
+    layer_norm_eps: 1e-5
+    # WWM
+    whole_word_mask: false
 
-    vocab_size :
-    max_len :
-    input_dim :
-    embed_dim : 512
-    hidden_dim : 768
-    num_heads : 12
-    batch_size : 32
-    dropout : 0.1
-    layers : 12
-    
+data:
+  train_file: "oscar_fr_sample.txt"
+  sp_model_path: "camembert_sp.model"
+  mlm_probability: 0.15
+
+training:
+  batch_size: 32
+  gradient_accumulation_steps: 1
+  save_steps: 10000
+  output_dir: "checkpoints"
