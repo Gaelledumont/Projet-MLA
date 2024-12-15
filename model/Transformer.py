@@ -25,7 +25,7 @@ class TransformerLayer(nn.Module):
         x = self.layernorm2(x)
         return x
 
-class Transformer(nn.Module):
+class TransformerEncoder(nn.Module):
     """
     Full Transfomer with 12 layers
     """
