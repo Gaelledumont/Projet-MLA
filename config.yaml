@@ -10,7 +10,7 @@ train:
 model:
     vocab_size: 32000
     max_len: 512
-    hidden_dim: 768
+    hidden_dim: 768 # Dimension de l'espace caché
     num_heads: 12
     num_layers: 12
     dropout: 0.1
