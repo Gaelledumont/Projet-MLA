@@ -5,7 +5,7 @@ from torch.utils.tensorboard import SummaryWriter
 import yaml
 from datetime import datetime
 
-from model.CamemBERTModel import Model
+from model.CamemBERTModel import CamemBERTModel
 from training.loss import Loss
 
 CONFIGROOT = "cfg"
@@ -18,7 +18,7 @@ with open(cfgs, "r") as f:
 class Training():
     def __init__(self, config, device):
         self.device = device
-        self.model = Model(
+        self.model = CamemBERTModel(
             vocab_size=config.vocab_size, 
             max_len=config.max_len,
             input_dim=config.input_dim, 
