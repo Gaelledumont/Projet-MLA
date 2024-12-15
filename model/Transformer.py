@@ -39,8 +39,7 @@ class TransformerEncoder(nn.Module):
         return hidden_states
     
 """
-In order to ob-
-tain a representation for a given token, we first
+In order to obtain a representation for a given token, we first
 compute the average of each sub-word's represen-
 tations in the last four layers of the Transformer,
 and then average the resulting sub-word vectors."""
