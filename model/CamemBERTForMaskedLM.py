@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from CamemBERTModel import CamemBERTModel
 
-class CamemBERTForMaskedKM(nn.Module):
+class CamemBERTForMaskedLM(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.camembert = CamemBERTModel(config)
