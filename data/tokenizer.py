@@ -1,6 +1,6 @@
 import sentencepiece as spm
 
-class CamembertTokenizer:
+class CamemBertTokenizer:
     def __init__(self, sp_model_path, special_tokens=["<s>", "</s>", "<unk>", "<pad>", "<mask>"]):
         self.sp = spm.SentencePieceProcessor()
         self.sp.Load(sp_model_path)
