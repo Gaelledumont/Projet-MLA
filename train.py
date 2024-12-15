@@ -5,8 +5,8 @@ from torch.utils.tensorboard import SummaryWriter
 import yaml
 from datetime import datetime
 
-from model.Model import Model
-from model.loss import Loss
+from model.CamemBERTModel import Model
+from training.loss import Loss
 
 CONFIGROOT = "cfg"
 
