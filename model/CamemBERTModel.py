@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from Transformer import TransformerEncoder
-from embedding import CamemBERTEmbedding
+from model.Transformer import TransformerEncoder
+from model.embedding import CamemBERTEmbedding
 
 class CamemBERTModel(nn.Module):
     def __init__(self, config):

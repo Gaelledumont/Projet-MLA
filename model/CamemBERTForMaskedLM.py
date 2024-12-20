@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from CamemBERTModel import CamemBERTModel
+from model.CamemBERTModel import CamemBERTModel
 
 class CamemBERTForMaskedLM(nn.Module):
     def __init__(self, config):

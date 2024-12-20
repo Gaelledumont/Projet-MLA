@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset
-from MLM import subword_masking, whole_word_masking
+from data.MLM import subword_masking, whole_word_masking
 
 class PretrainingDataset(Dataset):
     def __init__(self, tokenizer, file_path, max_length=512, mlm_probability=0.15, whole_word_mask=False):

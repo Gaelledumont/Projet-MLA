@@ -22,7 +22,7 @@ if __name__ == "__main__":
     max_len = config["model"]["max_len"]
     hidden_dim = config["model"]["hidden_dim"]
     num_heads = config["model"]["num_heads"]
-    num_layers = config["model"]["layers"]
+    num_layers = config["model"]["num_layers"]
     dropout = config["model"]["dropout"]
     intermediate_size = config["model"]["intermediate_size"] if "intermediate_size" in config["model"] else 3072
     pad_token_id = config["model"]["pad_token_id"]

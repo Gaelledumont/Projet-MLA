@@ -1,6 +1,6 @@
 import torch.nn as nn
-from MHSA import MultiHeadSelfAttention
-from FFN import FFN
+from model.MHSA import MultiHeadSelfAttention
+from model.FFN import FFN
 
 class TransformerLayer(nn.Module):
     """
