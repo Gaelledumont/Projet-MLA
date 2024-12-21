@@ -1,21 +1,28 @@
 import torch
 import torch.nn as nn
-from model.CamemBERTModel import CamemBERTModel
+from .camembert_model import CamembertModel
+from .camembert_config import CamembertConfig
 
-class CamemBERTForMaskedLM(nn.Module):
-    def __init__(self, config):
+class CamemForPreTraining(nn.Module):
+    def __init__(self, config: CamembertConfig):
         super().__init__()
-        self.camembert = CamemBERTModel(config)
+        self.camembert = CamembertModel(config)
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
-        self.lm_bias = nn.Parameter(torch.zeros(config.vocab_size))
-        self.lm_head.bias = self.lm_bias
+        self.layer_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
+        self.init_weights()
 
-    def forward(self, input_ids, labels=None):
-        hidden_states = self.camembert(input_ids)
-        logits = self.lm_head(hidden_states)
+    def init_weights(self):
+        for name, param in self.named_parameters():
+            if param.dim() > 1:
+                nn.init.xavier_uniform_(param)
+
+    def forward(self, input_ids, attention_mask=None, labels=None):
+        sequence_output = self.camembert(input_ids, attention_mask=attention_mask)
+        logits = self.lm_head(sequence_output)
 
         loss = None
         if labels is not None:
-            loss_fct = nn.CrossEntropyLoss(ignore_index=-100)
-            loss = loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
+            loss_fct = nn.CrossEntropyLoss()
+            loss = loss_fct(logits.view(-1, self.camembert.config.vocab_size), labels.view(-1))
+
         return logits, loss
