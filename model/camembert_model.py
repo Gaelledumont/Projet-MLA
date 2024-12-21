@@ -49,7 +49,22 @@ que des mtos tel que 'chat' et 'félin' auront des valeurs de vecteurs assez pro
 parallèlement on décide de créer des vecteurs d'embedding pour nos tokens qui ne donnent pas une info sur le 'sens' du mot mais cette fois ci 
 sur sa position dans la phrase car c'est important de garder le contexte pour faire de meilleures prédictions"""
 
+"""l'attention c'est ce qui dit au modèle 'concentre toi la dessu s'cest important' c'est calculé grâce à 3 matries : Queries, Keys et Values
++ de détails slides 70-72 dans el cours d'Obin
+ou https://medium.com/@geetkal67/attention-networks-a-simple-way-to-understand-self-attention-f5fb363c736d
+"""
+
+#the number of attention heads must evenly divide the number of channels
 class CamembertSelfAttention(nn.Module):
+    """
+    Multi-Head Self-Attention module.
+
+    Args:
+        num_heads (int): Number of attention heads.
+        dim (int): Dimensionality of the input features.
+        batch_size (int): Batch size of the input tensor.
+        qkv_bias (bool, optional): Whether to include a bias term in the Q, K, and V linear layers. Default is False.
+    """
     def __init__(self, config: CamembertConfig):
         super().__init__()
         if config.hidden_size % config.num_attention_heads != 0:
