@@ -1,71 +1,58 @@
-import yaml
+import os
+import glob
 import torch
-import torch.optim as optim
-from model.camembert_config import TransformerConfig
-from model.camembert_for_pretraining import CamemBERTForMaskedLM
-from data.tokenizer import CamemBertTokenizer
-from training.dataset import PretrainingDataset
+from model.camembert_for_pretraining import CamemForPreTraining, CamembertConfig
+from training.dataset import MLMDataset
 from training.trainer import Trainer
-from training.schedulers import PolynomialDecayLR
+from tokenization.sentencepiece_tokenizer import SentencePieceTokenizer
 
-if __name__ == "__main__":
-    with open("../config.yaml", "r") as f:
-        config = yaml.safe_load(f)
+def main():
+    # 1) Config
+    config = CamembertConfig(
+        vocab_size=32000,
+        hidden_size=768,
+        num_hidden_layers=12,
+        num_attention_heads=12,
+        intermediate_size=3072,
+        max_position_embeddings=512,
+        masking_strategy="subword" # ou "whole_word"
+    )
+    model = CamemForPreTraining(config)
 
-    # Récupération des configs
-    num_epochs = config["train"]["tune"]["num_epochs"]
-    lr = config["train"]["tune"]["lr"]
-    warmup_steps = config["train"]["tune"]["warmup_steps"]
-    total_steps = config["train"]["tune"]["total_steps"]
+    # 2) On repère les shards
+    shard_paths = sorted(glob.glob("date/processed/tokenized_shards/shard_*.pt"))
+    print(f"Found {len(shard_paths)} shards.")
 
-    vocab_size = config["model"]["vocab_size"]
-    max_len = config["model"]["max_len"]
-    hidden_dim = config["model"]["hidden_dim"]
-    num_heads = config["model"]["num_heads"]
-    num_layers = config["model"]["num_layers"]
-    dropout = config["model"]["dropout"]
-    intermediate_size = config["model"]["intermediate_size"] if "intermediate_size" in config["model"] else 3072
-    pad_token_id = config["model"]["pad_token_id"]
-    whole_word_mask = config["model"]["whole_word_mask"]
-
-    train_file = config["data"]["train_file"]
-    sp_model_path = config["data"]["sp_model_path"]
-    mlm_probability = config["data"]["mlm_probability"]
-
-    batch_size = config["training"]["batch_size"]
-    gradient_accumulation_steps = config["training"]["gradient_accumulation_steps"]
-    save_steps = config["training"]["save_steps"]
-    output_dir = config["training"]["output_dir"]
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    # On initialise le tokenizer
-    tokenizer = CamemBertTokenizer(sp_model_path)
-
-    # On construit la config du modèle
-    model_config = TransformerConfig(
-        vocab_size=vocab_size,
-        hidden_size=hidden_dim,
-        num_hidden_layers=num_layers,
-        num_attention_heads=num_heads,
-        intermediate_size=intermediate_size,
-        dropout_prob=dropout,
-        max_position_embeddings=max_len+2, # CamemBERT a 514 pour 512 tokens, incluant <s> et </s>
-        pad_token_id=pad_token_id
+    # 3) Dataset
+    tokenizer = SentencePieceTokenizer("data/processed/spm.model")
+    dataset = MLMDataset(
+        shards_paths=shard_paths,
+        vocab_size=config.vocab_size,
+        mask_prob=0.15,
+        mask_token_id=tokenizer.mask_token_id(),
+        pad_token_id=tokenizer.pad_token_id(),
+        max_seq_length=128,
+        masking_strategy=config.masking_strategy,
+        spm_processor=tokenizer.sp
     )
 
-    # On charge le dataset
-    dataset = PretrainingDataset(tokenizer, train_file, max_length=max_len, mlm_probability=mlm_probability, whole_word_mask=whole_word_mask)
+    # 4) Trainer
+    trainer = Trainer(
+        model=model,
+        dataset=dataset,
+        batch_size=32, # on ajuste selon la mémoire
+        lr=1e-4,
+        device='cuda'
+    )
 
-    # On initialise le modèle
-    model = CamemBERTForMaskedLM(model_config)
+    # 5) On lance l'entraînement
+    total_steps = 100000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
+    trainer.train(total_steps=total_steps)
 
-    # Optimizer Adam avec betas (0.9,0.98), weight decay
-    optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.9,0.98), eps=1e-6, weight_decay=0.01)
+    # 6) On sauvegarde
+    os.makedirs("checkpoints", exist_ok=True)
+    torch.save(model.state_dict(), "checkpoints/camembert_pretrained_4gb.pt")
+    print("Model saved.")
 
-    # Scheduler polynomial decay
-    scheduler = PolynomialDecayLR(optimizer, warmup_steps=warmup_steps, total_steps=total_steps)
-
-    trainer = Trainer(model, dataset, optimizer, scheduler, device=device, batch_size=batch_size,
-                      gradient_accumulation_steps=gradient_accumulation_steps, save_steps=save_steps, output_dir=output_dir)
-    trainer.train(epochs=num_epochs)
+if __name__ == "__main__":
+    main()
