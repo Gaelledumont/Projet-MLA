@@ -1,7 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
-from tqdm import tqdm
 import math
 from .schedulers import PolynomialDecayLR
 
