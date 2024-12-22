@@ -21,7 +21,7 @@ def main():
 
     # 2) On repère les shards
     shard_paths = sorted(glob.glob("date/processed/tokenized_shards/shard_*.pt"))
-    print(f"Found {len(shard_paths)} shards.")
+    print(f"Found {len(shard_paths)} shards for pretraining.")
 
     # 3) Dataset
     tokenizer = SentencePieceTokenizer("data/processed/spm.model")
@@ -33,21 +33,26 @@ def main():
         pad_token_id=tokenizer.pad_token_id(),
         max_seq_length=128,
         masking_strategy=config.masking_strategy,
-        spm_processor=tokenizer.sp
+        spm_processor=tokenizer.sp # pour WWM
     )
 
     # 4) Trainer
+    total_steps = 100000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
+    warmup_steps = 10000
     trainer = Trainer(
         model=model,
         dataset=dataset,
         batch_size=32, # on ajuste selon la mémoire
-        lr=1e-4,
+        lr=7e-4,            # peak lr = 0.0007 comme mentionné dans l'article
+        total_steps=total_steps,
+        warmup_steps=warmup_steps,
+        end_learning_rate=0.0,
+        power=1.0,          # linéaire
         device='cuda'
     )
 
     # 5) On lance l'entraînement
-    total_steps = 100000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
-    trainer.train(total_steps=total_steps)
+    trainer.train() # on va exécuter la boucle tant que step_count < total_steps
 
     # 6) On sauvegarde
     os.makedirs("checkpoints", exist_ok=True)
