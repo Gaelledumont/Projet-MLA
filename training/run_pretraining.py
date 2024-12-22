@@ -24,6 +24,8 @@ def main():
     shard_paths = sorted(glob.glob("date/processed/tokenized_shards/shard_*.pt"))
     print(f"Found {len(shard_paths)} shards for pretraining.")
 
+    # Shuffle global des shards pour que l'ordre d'itération soit aléatoire
+
     # 3) Dataset
     tokenizer = SentencePieceTokenizer("data/processed/spm.model")
     dataset = MLMDataset(
