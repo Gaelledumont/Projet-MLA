@@ -118,6 +118,11 @@ class MLMDataset(Dataset):
         # 10%: unchanged
         return input_ids, labels
 
+    """WWM is implemented by first randomly sampling 15% of the words in the sequence and then considering all subword tokens in each of this 15% 
+    for candidate replacement. This amounts to a proportion of selected tokens that is close to the original 15%. These tokens are then either replaced by
+    <MASK> tokens (80%), left unchanged (10%) or replaced by a random token.
+    """
+
     def whole_word_mask(self, input_ids):
         """
         Implémentation de Whole-Word Masking (WWM)
