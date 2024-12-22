@@ -10,7 +10,7 @@ class MLMDataset(Dataset):
             mask_prob=0.15,
             mask_token_id=4,
             pad_token_id=1,
-            max_seq_length=512,
+            max_seq_length=128,
             masking_strategy="subword",
             spm_processor=None
     ):
