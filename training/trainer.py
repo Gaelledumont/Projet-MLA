@@ -5,7 +5,7 @@ import math
 from .schedulers import PolynomialDecayLR
 
 class Trainer:
-    def __init__(self, model, dataset, batch_size=32, lr=1e-4, total_steps=100000, warmup_steps=10000, end_learning_rate=0.0, power=1.0, accumulation_steps=256, device='cuda', checkpoint_steps=10000, dev_dataset=None):
+    def __init__(self, model, dataset, batch_size=32, lr=7e-4, total_steps=100000, warmup_steps=10000, end_learning_rate=0.0, power=1.0, accumulation_steps=256, device='cuda', checkpoint_steps=10000, dev_dataset=None):
         """
         - total_steps: nombre total de pas d'entraînement
         - warmup_steps: nombre de pas de warmup
