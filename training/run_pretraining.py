@@ -1,6 +1,7 @@
 import os
 import glob
 import torch
+import random
 from model.camembert_for_pretraining import CamemForPreTraining, CamembertConfig
 from training.dataset import MLMDataset
 from training.trainer import Trainer
@@ -17,7 +18,7 @@ def main():
         max_position_embeddings=514,
         masking_strategy="subword" # ou "whole_word"
     )
-    model = CamemForPreTraining(config)
+    model = CamembertForPreTraining(config)
 
     # 2) On repère les shards
     shard_paths = sorted(glob.glob("date/processed/tokenized_shards/shard_*.pt"))
