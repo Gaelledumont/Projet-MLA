@@ -48,6 +48,7 @@ def main():
         warmup_steps=warmup_steps,
         end_learning_rate=0.0,
         power=1.0,          # linéaire
+        accumulation_steps=256,
         device='cuda'
     )
 
