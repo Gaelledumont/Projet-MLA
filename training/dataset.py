@@ -122,49 +122,31 @@ class MLMDataset(Dataset):
         """
         Implémentation de Whole-Word Masking (WWM)
         """
+        if self.spm_processor is None:
+            raise ValueError("spm_processor must be provided for whole word masking")
 
-        # 1) On convertit input_ids (tensor) en liste python
-        token_ids = input_ids.tolist()
+        # 1) On identifie les débuts de mots
+        is_begin_of_word = [self.spm_processor.is_begin_of_word(i) for i in input_ids.tolist()]
 
-        # 2) On détermine le début de chaque mot avec is_begin_of_word
-        #    is_begin_of_word(id) retourne True si ce token commence un mot,
-        #    False sinon (suite du mot précédent).
+        # 2) On crée un masque de probabilité
+        probability_matrix = torch.full(input_ids.shape, self.mask_prob)
 
-        #    On va ainsi collecter des "segments" (word_starts, word_ends)
-        word_boundaries = []
-        start_idx = 0
-        for i, tid in enumerate(token_ids):
-            if i == 0:
-                # Premier token, on le considère toujours comme un début (sauf si c'est un token spécial)
-                continue
-            if self.spm_processor.is_begin_of_word(tid):
-                # On clôt le mot précédent : [start_idx, i-1]
-                word_boundaries.append((start_idx, i-1))
-                start_idx = i
-        # Fin : on ajoute le dernier mot
-        word_boundaries.append((start_idx, len(token_ids) - 1))
+        # 3) On ne masque pas les tokens spéciaux (padding)
+        probability_matrix.masked_fill_(input_ids == self.pad_token_id, 0.0)
 
-        # 3) On prépare un masque booléen 'masked_indices'
-        #    qui indiquera quelles positions sont masquées.
-        masked_indices = torch.zeros_like(input_ids, dtype=torch.bool)
+        # 4) On masque des mots entiers
+        for i, is_begin in enumerate(is_begin_of_word):
+            if is_begin and probability_matrix[i] > 0:
+                j = i
+                while j < len(is_begin_of_word) and not is_begin_of_word[j]:
+                    probability_matrix[j] = 1.0
+                    j += 1
 
-        # 4) On parcourt chaque "mot" repéré
-        for (w_start, w_end) in word_boundaries:
-            # On ne masque pas si ce sont des tokens spéciaux (PAD, etc.)
-            # Dans la plupart des cas, sp.is_begin_of_word() sera False sur <pad> ou <unk>
-            # mais par prudence on va filtrer.
-            # Ensuite, on tire p=mask_prob pour masquer ou non ce mot
-            if random.random() < self.mask_prob:
-                # On masque tous les sous-tokens de [w_start, w_end],
-                # sauf ceux qui valent pad_token_id
-                for j in range(w_start, w_end + 1):
-                    if token_ids[j] != self.pad_token_id:
-                        masked_indices[j] = True
-
-        # 5) On crée le vacteur 'labels' = copie de input_ids
+        # 5) On applique le masque
+        masked_indices = torch.bernoulli(probability_matrix).bool()
         labels = input_ids.clone()
         # Positions non masquées => -100 (pas de contribution à la loss)
-        labels[~masked_indices] = -100
+        labels[~masked_indices] = -100 # on ne calcule pas la loss sur les tokens non masqués
 
         # 6) On applique le schéma 80/10/10
         #    On note : indices_replaced -> 80% de 'masked_indices' => <mask>
