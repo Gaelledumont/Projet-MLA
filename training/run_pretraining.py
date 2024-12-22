@@ -31,7 +31,7 @@ def main():
         mask_prob=0.15,
         mask_token_id=tokenizer.mask_token_id(),
         pad_token_id=tokenizer.pad_token_id(),
-        max_seq_length=128,
+        max_seq_length=512,
         masking_strategy=config.masking_strategy,
         spm_processor=tokenizer.sp # pour WWM
     )
