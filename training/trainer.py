@@ -1,53 +1,48 @@
 import torch
 from torch.utils.data import DataLoader
-import os
+import torch.optim as optim
+import tqdm as tqdm
 
 class Trainer:
-    def __init__(self, model, dataset, optimizer, scheduler, device='cuda', batch_size=32, gradient_accumulation_steps=1, save_steps=10000, output_dir='checkpoints'):
-        self.model = model.to(device)
+    def __init__(self, model, dataset, batch_size=16, lr=1e-4, max_seq_length=128, accumulation_steps=1, device='cuda'):
+        self.model = model
         self.dataset = dataset
-        self.optimizer = optimizer
-        self.scheduler = scheduler
-        self.device = device
         self.batch_size = batch_size
-        self.gradient_accumulation_steps = gradient_accumulation_steps
-        self.save_steps = save_steps
-        self.output_dir = output_dir
-        self.global_step = 0
+        self.lr = lr
+        self.device = device
+        self.dataloader = DataLoader(dataset, batch_size=batch_size, num_workers=4)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
+        self.accumulation_steps = accumulation_steps
 
-        if not os.path.exists(self.output_dir):
-            os.makedirs(self.output_dir)
+    def train(self, total_steps=100000):
+        self.model.to(self.device)
+        self.model.train()
+        step_count = 0
+        loss_accum = 0.0
 
-    def train(self, epochs=1):
-        dataloader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, drop_last=True)
-        for epoch in range(epochs):
-            self.model.train()
-            for step, batch in enumerate(dataloader):
-                input_ids, labels = batch
+        while step_count < total_steps:
+            for input_ids, attention_mask, labels in self.dataloader:
                 input_ids = input_ids.to(self.device)
+                attention_mask = attention_mask.to(self.device)
                 labels = labels.to(self.device)
 
-                _, loss = self.model(input_ids, labels=labels)
-                loss = loss / self.gradient_accumulation_steps
+                logits, loss = self.model(input_ids, attention_mask=attention_mask, labels=labels)
+                loss = loss / self.accumulation_steps
                 loss.backward()
+                loss_accum += loss.item()
 
-                if (step+1)%self.gradient_accumulation_steps==0:
+                if (step_count + 1) % self.accumulation_steps == 0:
                     self.optimizer.step()
-                    self.scheduler.step()
-                    self.model.zero_grad()
-                    self.global_step += 1
+                    self.optimizer.zero_grad()
 
-                    if self.global_step%100==0:
-                        print(f"Global Step: {self.global_step}, Loss: {loss.item()*self.gradient_accumulation_steps:.4f}")
+                step_count += 1
+                if step_count % 1000 == 0:
+                    print(f"Step: {step_count}, loss: {loss_accum / 1000:.4f}")
+                    loss_accum = 0.0
 
-                    if self.global_step%self.save_steps==0:
-                        self.save_checkpoint()
+                if step_count >= total_steps:
+                    break
 
-    def save_checkpoint(self):
-        ckpt_path = os.path.join(self.output_dir, f"checkpoint-{self.global_step}.pt")
-        torch.save({
-            'model_state_dict': self.model.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            'global_step': self.global_step
-        }, ckpt_path)
-        print(f"Saved checkpoint at {ckpt_path}")
+            # On boucle sur le dataset "à l'infini" jusqu'au nombre total d'étapes
+
+        print("Training complete.")
