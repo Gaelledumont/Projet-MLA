@@ -4,6 +4,21 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .camembert_config import CamembertConfig
 
+def roberta_init_weights(module: nn.Module, initializer_range: float):
+    if isinstance(module, nn.Linear):
+        # Poids - N(0, initializer_range)
+        nn.init.normal_(module.weight, mean=0., std=initializer_range)
+        if module.bias is not None:
+            nn.init.zeros_(module.bias)
+    elif isinstance(module, nn.Embedding):
+        nn.init.normal_(module.weight, mean=0., std=initializer_range)
+        if module.padding_idx is not None:
+            # On remet le vecteur du padding_idx à zéro
+            module.weight.data[module.padding_idx].zero_()
+    elif isinstance(module, nn.LayerNorm):
+        nn.init.zeros_(module.bias)
+        nn.init.ones_(module.weight)
+
 # https://www.youtube.com/watch?v=dichIcUZfOw (pourquoi on fait du positional encoding,
 #le reste de la vidéo est moins important parce que c'est pas le même encding qu'est utilisé)
 
@@ -17,25 +32,21 @@ class CamembertEmbeddings(nn.Module):
     """
     def __init__(self, config: CamembertConfig):
         super().__init__()
-        self.word_embedding = nn.Embedding(config.vocab_size, config.hidden_size)
+        self.word_embedding = nn.Embedding(config.vocab_size, config.hidden_size, padding_idx=1)
         self.position_embedding = nn.Embedding(config.max_position_embeddings, config.hidden_size)
-        self.token_type_embeddings = nn.Embedding(config.type_vocab_size, config.hidden_size)
         self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
-    def forward(self, input_ids, token_type_ids=None):
-        if token_type_ids is None:
-            token_type_ids = torch.zeros_like(input_ids)
-
+    def forward(self, input_ids):
+        # input_ids: (batch_size, seq_len)
         seq_length = input_ids.size(1)
         position_ids = torch.arange(seq_length, dtype=torch.long, device=input_ids.device)
         position_ids = position_ids.unsqueeze(0).expand_as(input_ids)
 
         word_emb = self.word_embedding(input_ids)
         pos_emb = self.position_embedding(position_ids)
-        tok_type_emb = self.token_type_embeddings(token_type_ids)
 
-        embeddings = word_emb + pos_emb + tok_type_emb
+        embeddings = word_emb + pos_emb
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
         return embeddings
@@ -177,12 +188,8 @@ class CamembertModel(nn.Module):
         self.config = config
         self.embeddings = CamembertEmbeddings(config)
         self.encoder = CamembertEncoder(config)
-        self.init_weights()
 
-    def init_weights(self):
-        for name, param in self.named_parameters():
-            if param.dim() > 1:
-                nn.init.xavier_uniform_(param)
+        self.apply(lambda module: roberta_init_weights(module, config.initializer_range))
 
     def forward(self, input_ids, attention_mask=None):
         if attention_mask is not None:
