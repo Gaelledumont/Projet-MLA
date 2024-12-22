@@ -16,7 +16,7 @@ class PolynomialDecayLR:
 
     def get_lr(self, param_group_idx):
         if self.current_step < self.warmup_steps:
-            return self.base_lrs[param_group_idx]*self.current_step/self.warmup_steps
+            return self.base_lrs[param_group_idx] * self.current_step / self.warmup_steps
         else:
             progress = (self.current_step - self.warmup_steps) / (self.total_steps - self.warmup_steps)
             decay = (1 - progress)**self.power
