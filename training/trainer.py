@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
+from tqdm import tqdm
 import math
 from .schedulers import PolynomialDecayLR
 
@@ -10,6 +11,7 @@ class Trainer:
         - total_steps: nombre total de pas d'entraînement
         - warmup_steps: nombre de pas de warmup
         - end_learning_rate: lr min (0.0)
+        - accumulation_steps : gradient accumulation
         - power : exponentielle pour polynomial decay (1.0 => linéaire)
         - checkpoint_steps : sauvegarde un checkpoint tous les X steps
         - dev_dataset : un dataset "val" pour calculer une perplexité de validation
@@ -21,11 +23,25 @@ class Trainer:
         self.device = device
         self.total_steps = total_steps
         self.warmup_steps = warmup_steps
+        self.end_learning_rate = end_learning_rate
+        self.power = power
         self.accumulation_steps = accumulation_steps
         self.checkpoint_steps = checkpoint_steps
         self.dev_dataset = dev_dataset
 
+        # On calcule steps_per_epoch
+        # len(dataset) = total nb d'échantillons
+        effective_batch_size = batch_size * accumulation_steps
+        dataset_size = len(self.dataset)
+        self.steps_per_epoch = math.ceil(dataset_size / effective_batch_size)
+
+        # On en déduit un max d'epochs pour atteindre total_steps
+        self.total_epochs = math.ceil(self.total_steps / self.steps_per_epoch)
+
+        print(f"[Trainer] steps per epoch = {self.steps_per_epoch}, total epochs = {self.total_epochs}")
+
         # DataLoader entraînement
+        # on peut shuffle à chaque epoch pour la robustesse
         self.dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
 
         # Optimizer (Adam avec batas=(0.9, 0.98))
@@ -56,34 +72,37 @@ class Trainer:
         step_count = 0
         loss_accum = 0.0
 
-        while step_count < self.total_steps:
-            for input_ids, attention_mask, labels in self.dataloader:
+        # Boucle par epoch
+        for epoch in range(1, self.total_epochs + 1):
+            print(f"===== EPOCH {epoch}/{self.total_epochs} =====")
+
+            # On affiche une barre de progression sur l'epoch
+            for batch_idx, (input_ids, attention_mask, labels) in enumerate(tqdm(self.dataloader), start=1):
                 input_ids = input_ids.to(self.device)
                 attention_mask = attention_mask.to(self.device)
                 labels = labels.to(self.device)
 
-                # Forward + Backward
+                # Forward
                 logits, loss = self.model(input_ids, attention_mask=attention_mask, labels=labels)
+
+                # Accumulation
                 loss = loss / self.accumulation_steps
                 loss.backward()
                 loss_accum += loss.item()
 
-                # Gradient accumulation
+                # Mise à jour une fois tous les `accumulation_steps`
                 if (step_count + 1) % self.accumulation_steps == 0:
-                    self.optimizer.step()        # mise à jour des poids
-                    self.scheduler.step()        # mise à jour du LR
+                    self.optimizer.step()       # mise à jour des poids
+                    self.scheduler.step()       # mise à jour du LR
                     self.optimizer.zero_grad()
 
                 step_count += 1
 
                 # Logging
                 if step_count % 1000 == 0:
+                    avg_loss = loss_accum / 1000
                     current_lr = self.optimizer.param_groups[0]['lr']
-                    print(
-                        f"Step: {step_count}, "
-                        f"Avg Loss last 1000 steps: {loss_accum / 1000:.4f}, "
-                        f"LR: {current_lr:.6e}"
-                    )
+                    print(f"Step {step_count} | Avg Loss = {avg_loss:.4f} | LR = {current_lr:.6e}")
                     loss_accum = 0.0
 
                     # Validation
@@ -96,10 +115,15 @@ class Trainer:
                     torch.save(self.model.state_dict(), f"checkpoints/checkpoint_{step_count}.pt")
                     print(f"Checkpoint saved at step {step_count}.")
 
+                # Si on a déjà atteint total_steps, on s'arrête
                 if step_count >= self.total_steps:
+                    print(f"Reached total steps={self.total_steps}, stopping.")
                     break
 
             # On boucle sur le dataset "à l'infini" jusqu'au nombre total d'étapes
+
+            if step_count >= self.total_steps:
+                break
 
         print(f"Training complete after {step_count} steps.")
 
