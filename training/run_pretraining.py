@@ -14,7 +14,7 @@ def main():
         num_hidden_layers=12,
         num_attention_heads=12,
         intermediate_size=3072,
-        max_position_embeddings=512,
+        max_position_embeddings=514,
         masking_strategy="subword" # ou "whole_word"
     )
     model = CamemForPreTraining(config)
