@@ -153,6 +153,9 @@ class CamembertLayer(nn.Module):
         return layer_output
 
 class CamembertEncoder(nn.Module):
+    """
+    Full Transfomer with 12 layers
+    """
     def __init__(self, config: CamembertConfig):
         super().__init__()
         self.layers = nn.ModuleList([CamembertLayer(config) for _ in range(config.num_hidden_layers)])
@@ -161,6 +164,12 @@ class CamembertEncoder(nn.Module):
         for layer in self.layers:
             hidden_states = layer(hidden_states, attention_mask)
         return hidden_states
+
+"""
+In order to obtain a representation for a given token, we first
+compute the average of each sub-word's represen-
+tations in the last four layers of the Transformer,
+and then average the resulting sub-word vectors."""
 
 class CamembertModel(nn.Module):
     def __init__(self, config: CamembertConfig):
