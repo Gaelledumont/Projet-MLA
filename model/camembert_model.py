@@ -7,11 +7,11 @@ from .camembert_config import CamembertConfig
 def roberta_init_weights(module: nn.Module, initializer_range: float):
     if isinstance(module, nn.Linear):
         # Poids - N(0, initializer_range)
-        nn.init.normal_(module.weight, mean=0., std=initializer_range)
+        nn.init.normal_(module.weight, mean=0.0, std=initializer_range)
         if module.bias is not None:
             nn.init.zeros_(module.bias)
     elif isinstance(module, nn.Embedding):
-        nn.init.normal_(module.weight, mean=0., std=initializer_range)
+        nn.init.normal_(module.weight, mean=0.0, std=initializer_range)
         if module.padding_idx is not None:
             # On remet le vecteur du padding_idx à zéro
             module.weight.data[module.padding_idx].zero_()
