@@ -1,15 +1,15 @@
 import yaml
 import torch
 import torch.optim as optim
-from model.config import TransformerConfig
-from model.CamemBERTForMaskedLM import CamemBERTForMaskedLM
+from model.camembert_config import TransformerConfig
+from model.camembert_for_pretraining import CamemBERTForMaskedLM
 from data.tokenizer import CamemBertTokenizer
-from data.dataset import PretrainingDataset
+from training.dataset import PretrainingDataset
 from training.trainer import Trainer
 from training.schedulers import PolynomialDecayLR
 
 if __name__ == "__main__":
-    with open("config.yaml", "r") as f:
+    with open("../config.yaml", "r") as f:
         config = yaml.safe_load(f)
 
     # Récupération des configs
