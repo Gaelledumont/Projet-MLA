@@ -2,7 +2,7 @@ import os
 import glob
 import torch
 import random
-from model.camembert_for_pretraining import CamemForPreTraining, CamembertConfig
+from model.camembert_for_pretraining import CamembertForPreTraining, CamembertConfig
 from training.dataset import MLMDataset
 from training.trainer import Trainer
 from tokenization.sentencepiece_tokenizer import SentencePieceTokenizer
