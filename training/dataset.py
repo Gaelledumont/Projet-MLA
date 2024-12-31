@@ -11,7 +11,7 @@ class MLMDataset(Dataset):
             mask_token_id=4,
             pad_token_id=1,
             max_seq_length=512,
-            masking_strategy="subword",
+            masking_strategy="whole_word",
             spm_processor=None
     ):
         """
