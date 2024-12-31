@@ -25,6 +25,9 @@ class MLMDataset(Dataset):
         spm_processor: SentencePieceProcessor optionnel pour le WWM
         """
         self.shards_paths = shards_paths
+        # On shuffle le tableau de shards
+        random.shuffle(self.shards_paths)
+
         self.vocab_size = vocab_size
         self.mask_prob = mask_prob
         self.mask_token_id = mask_token_id
@@ -33,16 +36,19 @@ class MLMDataset(Dataset):
         self.masking_strategy = masking_strategy
         self.spm_processor = spm_processor
 
-        # On garde en mémoire l'index du shard courant
+        # Indices
         self.current_shard_index = 0
         self.current_shard_data = None
-        # On charge le premier shard
+        self.position_in_shard = 0
         self._load_current_shard()
+
+        # Petit log pour être sûr
+        print(f"[MLMDataset] Using mask_token_id={mask_token_id} (vocab_size={vocab_size})")
 
     def _load_current_shard(self):
         if self.current_shard_index >= len(self.shards_paths):
-            self.current_shard_data = []
-            return
+            self.current_shard_index = 0
+            random.shuffle(self.shards_paths)
         shard_path = self.shards_paths[self.current_shard_index]
         self.current_shard_data = torch.load(shard_path)
         random.shuffle(self.current_shard_data) # On mélange un peu
@@ -52,10 +58,10 @@ class MLMDataset(Dataset):
         # Approx : on considère que la taille effective est la somme des longueurs de chaque shard
         # Mais on peut renvoyer un "grand" nombre ou l'approx
         total = 0
-        for sp in self.shards_paths:
+        for p in self.shards_paths:
             # On peut charger juste la taille ou charger le shard
             # On simplifie en comptant la taille brute
-            data = torch.load(sp, map_location="cpu")
+            data = torch.load(p, map_location="cpu")
             total += len(data)
         return total
 
@@ -68,13 +74,9 @@ class MLMDataset(Dataset):
                 if self.current_shard_index >= len(self.shards_paths):
                     # plus de data
                     self.current_shard_index = 0
-                    self._load_current_shard()
-                else:
-                    self._load_current_shard()
+                    random.shuffle(self.shards_paths)
+                self._load_current_shard()
 
-            if len(self.current_shard_data) == 0:
-                # plus de data -> fin
-                return self._prepare_sample([]) # dummy
             seq = self.current_shard_data[self.position_in_shard]
             self.position_in_shard += 1
 
@@ -125,35 +127,45 @@ class MLMDataset(Dataset):
 
     def whole_word_mask(self, input_ids):
         """
-        Implémentation de Whole-Word Masking (WWM)
+        Tente d'utiliser is_begin_of_word()
+        S'il n'existe pas, fallback vers la méthode reposant sur "_"
         """
-        if self.spm_processor is None:
-            raise ValueError("spm_processor must be provided for whole word masking")
+        if self.spm_processor and hasattr(self.spm_processor, "is_begin_of_word"):
+            return self.wwm_is_begin_of_word(input_ids)
+        else:
+            return self.wwm_fallback_underscore(input_ids)
 
-        # 1) On identifie les débuts de mots
-        is_begin_of_word = [self.spm_processor.is_begin_of_word(i) for i in input_ids.tolist()]
+    def wwm_is_begin_of_word(self, input_ids):
+        """
+        Implémentation de WWM utilisant sp.is_begin_of_word(token_id).
+        """
+        token_list = input_ids.tolist()
+        masked_indices = torch.zeros_like(input_ids, dtype=torch.bool)
 
-        # 2) On crée un masque de probabilité
-        probability_matrix = torch.full(input_ids.shape, self.mask_prob)
+        # On repère les mots
+        word_boundaries = []
+        start_idx = 0
+        for i, tid in enumerate(token_list):
+            if i == 0:
+                # Premier token, on le considère comme "continu"
+                continue
+            if self.spm_processor.is_begin_of_word(tid):
+                # on ferme le mot précédent
+                word_boundaries.append((start_idx, i-1))
+                start_idx = i
+        # ferme le dernier
+        word_boundaries.append((start_idx, len(token_list) - 1))
 
-        # 3) On ne masque pas les tokens spéciaux (padding)
-        probability_matrix.masked_fill_(input_ids == self.pad_token_id, 0.0)
+        for (wstart, wend) in word_boundaries:
+            if random.random() < self.mask_prob:
+                for j in range(wstart, wend+1):
+                    if token_list[j] != self.pad_token_id:
+                        masked_indices[j] = True
 
-        # 4) On masque des mots entiers
-        for i, is_begin in enumerate(is_begin_of_word):
-            if is_begin and probability_matrix[i] > 0:
-                j = i
-                while j < len(is_begin_of_word) and not is_begin_of_word[j]:
-                    probability_matrix[j] = 1.0
-                    j += 1
-
-        # 5) On applique le masque
-        masked_indices = torch.bernoulli(probability_matrix).bool()
         labels = input_ids.clone()
-        # Positions non masquées => -100 (pas de contribution à la loss)
-        labels[~masked_indices] = -100 # on ne calcule pas la loss sur les tokens non masqués
+        labels[~masked_indices] = -100
 
-        # 6) On applique le schéma 80/10/10
+        # On applique le schéma 80/10/10
         #    On note : indices_replaced -> 80% de 'masked_indices' => <mask>
         indices_replaced = torch.bernoulli(torch.full(labels.shape, 0.8)).bool() & masked_indices
         input_ids[indices_replaced] = self.mask_token_id
@@ -164,5 +176,47 @@ class MLMDataset(Dataset):
         input_ids[indices_random] = random_tokens[indices_random]
 
         # 10% inchangé => rien à faire
+
+        return input_ids, labels
+
+    def wwm_fallback_underscore(self, input_ids):
+        """
+        Fallback: on détecte les débuts de mots en cherchant l'underscore "▁".
+        """
+        token_list = input_ids.tolist()
+        # On convertit l'ID en string
+        if not self.spm_processor:
+            return self.subword_mask(input_ids)  # fallback total
+
+        subwords = [self.spm_processor.id_to_piece(tid) for tid in token_list]
+        masked_indices = torch.zeros_like(input_ids, dtype=torch.bool)
+
+        # repérage
+        word_boundaries = []
+        start_idx = 0
+        for i, sw in enumerate(subwords):
+            if i == 0:
+                continue
+            if sw.startswith("▁"):
+                word_boundaries.append((start_idx, i-1))
+                start_idx = i
+        word_boundaries.append((start_idx, len(subwords)-1))
+
+        for (wstart, wend) in word_boundaries:
+            if random.random() < self.mask_prob:
+                for j in range(wstart, wend+1):
+                    if token_list[j] != self.pad_token_id:
+                        masked_indices[j] = True
+
+        labels = input_ids.clone()
+        labels[~masked_indices] = -100
+
+        # 80/10/10
+        indices_replaced = torch.bernoulli(torch.full(labels.shape, 0.8)).bool() & masked_indices
+        input_ids[indices_replaced] = self.mask_token_id
+
+        indices_random = torch.bernoulli(torch.full(labels.shape, 0.1)).bool() & masked_indices & ~indices_replaced
+        random_tokens = torch.randint(self.vocab_size, labels.shape, dtype=torch.long)
+        input_ids[indices_random] = random_tokens[indices_random]
 
         return input_ids, labels
