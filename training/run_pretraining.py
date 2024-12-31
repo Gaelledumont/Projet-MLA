@@ -1,7 +1,6 @@
 import os
 import glob
 import torch
-import random
 from model.camembert_for_pretraining import CamembertForPreTraining, CamembertConfig
 from training.dataset import MLMDataset
 from training.trainer import Trainer
