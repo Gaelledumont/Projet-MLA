@@ -19,7 +19,7 @@ def main():
         num_attention_heads=12,
         intermediate_size=3072,
         max_position_embeddings=512,
-        masking_strategy="subword" # ou "whole_word"
+        masking_strategy="whole_word" # ou "subword"
     )
     model = CamembertForPreTraining(config)
 
