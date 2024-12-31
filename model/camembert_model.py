@@ -69,12 +69,6 @@ ou https://medium.com/@geetkal67/attention-networks-a-simple-way-to-understand-s
 class CamembertSelfAttention(nn.Module):
     """
     Multi-Head Self-Attention module.
-
-    Args:
-        num_heads (int): Number of attention heads.
-        dim (int): Dimensionality of the input features.
-        batch_size (int): Batch size of the input tensor.
-        qkv_bias (bool, optional): Whether to include a bias term in the Q, K, and V linear layers. Default is False.
     """
     def __init__(self, config: CamembertConfig):
         super().__init__()
