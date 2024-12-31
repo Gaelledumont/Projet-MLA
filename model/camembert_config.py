@@ -11,7 +11,7 @@ class CamembertConfig:
             max_position_embeddings=512,
             type_vocab_size=1,
             initializer_range=0.02,
-            layer_norm_eps=1e-5,
+            layer_norm_eps=1e-12,
             masking_strategy="subword" # ou "whole_word" pour gérer WWM
     ):
         self.vocab_size = vocab_size
