@@ -6,7 +6,7 @@ import math
 from .schedulers import PolynomialDecayLR
 
 class Trainer:
-    def __init__(self, model, dataset, batch_size=32, lr=7e-4, total_steps=100000, warmup_steps=10000, end_learning_rate=0.0, power=1.0, accumulation_steps=256, device='cuda', checkpoint_steps=10000, dev_dataset=None):
+    def __init__(self, model, dataset, batch_size=32, lr=7e-4, total_steps=100000, warmup_steps=10000, end_learning_rate=0.0, power=1.0, accumulation_steps=256, device='cuda', checkpoint_steps=10000, dev_dataset=None, eval_steps=2000):
         """
         - total_steps: nombre total de pas d'entraînement
         - warmup_steps: nombre de pas de warmup
@@ -15,6 +15,7 @@ class Trainer:
         - power : exponentielle pour polynomial decay (1.0 => linéaire)
         - checkpoint_steps : sauvegarde un checkpoint tous les X steps
         - dev_dataset : un dataset "val" pour calculer une perplexité de validation
+        - eval_steps : on fait evaluate_dev() tous les X steps
         """
         self.model = model
         self.dataset = dataset
@@ -28,6 +29,7 @@ class Trainer:
         self.accumulation_steps = accumulation_steps
         self.checkpoint_steps = checkpoint_steps
         self.dev_dataset = dev_dataset
+        self.eval_steps = eval_steps
 
         # On calcule steps_per_epoch
         # len(dataset) = total nb d'échantillons
@@ -56,8 +58,8 @@ class Trainer:
             optimizer=self.optimizer,
             warmup_steps=self.warmup_steps,
             total_steps=self.total_steps,
-            end_learning_rate=end_learning_rate,
-            power=power,
+            end_learning_rate=self.end_learning_rate,
+            power=self.power,
         )
 
         # Si on a un dev_dataset
@@ -83,7 +85,7 @@ class Trainer:
                 labels = labels.to(self.device)
 
                 # Forward
-                logits, loss = self.model(input_ids, attention_mask=attention_mask, labels=labels)
+                _, loss = self.model(input_ids, attention_mask=attention_mask, labels=labels)
 
                 # Accumulation
                 loss = loss / self.accumulation_steps
@@ -106,9 +108,9 @@ class Trainer:
                     loss_accum = 0.0
 
                     # Validation
-                    if self.dev_dataset is not None:
-                        val_loss, val_perplexity = self.evaluate_dev()
-                        print(f"  [Dev] loss={val_loss:.4f}, ppl={val_perplexity:.2f}")
+                    if self.dev_dataset is not None and (step_count % self.eval_steps == 0):
+                        val_loss, val_ppl = self.evaluate_dev()
+                        print(f"  [Dev] loss={val_loss:.4f}, ppl={val_ppl:.2f}")
 
                 # Checkpointing
                 if step_count % self.checkpoint_steps == 0:
