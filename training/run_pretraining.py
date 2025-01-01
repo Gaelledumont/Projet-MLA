@@ -58,7 +58,7 @@ def main():
             masking_strategy=config.masking_strategy,
             spm_processor=tokenizer.sp
         )
-        print(f"Found {len(dev_shard)} dev shards")
+        print(f"Found {len(dev_shard)} dev shards.")
     else:
         print(f"No dev shard found. Perplexity won't be tracked.")
 
