@@ -14,7 +14,7 @@ def train_sentencepiece(corpus_path, model_prefix="spm", vocab_size=32000):
         f"--model_type=bpe "
         f"--unk_id=0 --pad_id=1 --bos_id=2 --eos_id=3 "
         f"--user_defined_symbols=<mask> "
-        f"--hard_vocab_limit=false"
+        f"--hard_vocab_limit=false "
         f"--num_threads=8 "
     )
     spm.SentencePieceTrainer.Train(spm_cmd)
