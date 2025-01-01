@@ -77,7 +77,8 @@ def main():
         accumulation_steps=256,
         device='cuda',
         dev_dataset=dev_dataset,    # dev dataset
-        eval_steps=2000             # toutes les 2000 steps on calcule la perplexité
+        eval_steps=2000,            # toutes les 2000 steps on calcule la perplexité
+        use_amp=True
     )
 
     # 8) On lance l'entraînement
