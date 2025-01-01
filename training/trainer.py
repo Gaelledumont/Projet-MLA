@@ -48,7 +48,7 @@ class Trainer:
         # on peut shuffle à chaque epoch pour la robustesse
         self.dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
 
-        # Optimizer (Adam avec batas=(0.9, 0.98))
+        # Optimizer (Adam avec betas=(0.9, 0.98))
         self.optimizer = optim.Adam(
             self.model.parameters(),
             lr=lr,
