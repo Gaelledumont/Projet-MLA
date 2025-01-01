@@ -1,4 +1,5 @@
 import torch
+from torch.cuda.amp import autocast, GradScaler
 from torch.utils.data import DataLoader
 import torch.optim as optim
 from tqdm import tqdm
@@ -6,7 +7,7 @@ import math
 from .schedulers import PolynomialDecayLR
 
 class Trainer:
-    def __init__(self, model, dataset, batch_size=32, lr=7e-4, total_steps=100000, warmup_steps=10000, end_learning_rate=0.0, power=1.0, accumulation_steps=256, device='cuda', checkpoint_steps=10000, dev_dataset=None, eval_steps=2000):
+    def __init__(self, model, dataset, batch_size=32, lr=7e-4, total_steps=100000, warmup_steps=10000, end_learning_rate=0.0, power=1.0, accumulation_steps=256, device='cuda', checkpoint_steps=10000, dev_dataset=None, eval_steps=2000, use_amp=False):
         """
         - total_steps: nombre total de pas d'entraînement
         - warmup_steps: nombre de pas de warmup
@@ -30,6 +31,7 @@ class Trainer:
         self.checkpoint_steps = checkpoint_steps
         self.dev_dataset = dev_dataset
         self.eval_steps = eval_steps
+        self.use_amp = use_amp
 
         # On calcule steps_per_epoch
         # len(dataset) = total nb d'échantillons
@@ -62,6 +64,12 @@ class Trainer:
             power=self.power,
         )
 
+        # Si on active la Mixed Precision
+        if self.use_amp:
+            self.scaler = GradScaler()
+        else:
+            self.scaler = None
+
         # Si on a un dev_dataset
         if self.dev_dataset is not None:
             self.dev_dataloader = DataLoader(self.dev_dataset, batch_size=batch_size, shuffle=False)
@@ -85,16 +93,31 @@ class Trainer:
                 labels = labels.to(self.device)
 
                 # Forward
-                _, loss = self.model(input_ids, attention_mask=attention_mask, labels=labels)
+                if self.use_amp:
+                    with autocast():
+                        _, loss = self.model(input_ids, attention_mask=attention_mask, labels=labels)
+                else:
+                    _, loss = self.model(input_ids, attention_mask=attention_mask, labels=labels)
 
-                # Accumulation
+                # Accumulation du gradient
                 loss = loss / self.accumulation_steps
-                loss.backward()
+
+                # Backward
+                if self.use_amp:
+                    self.scaler.scale(loss).backward()
+                else:
+                    loss.backward()
+
                 loss_accum += loss.item()
 
                 # Mise à jour une fois tous les `accumulation_steps`
                 if (step_count + 1) % self.accumulation_steps == 0:
-                    self.optimizer.step()       # mise à jour des poids
+                    if self.use_amp:
+                        self.scaler.step(self.optimizer)
+                        self.scaler.update()
+                    else:
+                        self.optimizer.step()       # mise à jour des poids
+
                     self.scheduler.step()       # mise à jour du LR
                     self.optimizer.zero_grad()
 
