@@ -33,6 +33,6 @@ def chunk_and_tokenize(corpus_path, spm_model, shard_size=100000, output_dir="da
     print(f"Tokenized corpus into {shard_size+1} shards in {output_dir}.")
 
 if __name__ == "__main__":
-    corpus_path = "data/raw/fr_corpus_4GB.txt"
-    spm_model_path = "data/processed/spm_model"
+    corpus_path = "data/raw/oscar_fr_4GB_fixed.txt"
+    spm_model_path = "data/processed/spm.model"
     chunk_and_tokenize(corpus_path, spm_model_path, shard_size=100000)
