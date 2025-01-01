@@ -3,7 +3,7 @@ import random
 import sentencepiece as spm
 import torch
 
-def chunk_and_tokenize(corpus_path, spm_model, shard_size=100000, output_dir="data/processed", dev_ratio=0.1, shuffle_lines=True):
+def chunk_and_tokenize(corpus_path, spm_model, shard_size=100000, output_dir="data/processed", dev_ratio=0.02, shuffle_lines=True):
     """
     Lit le corpus ligne par ligne, sépare un dev set, tokenize, puis stocke par blocs (shards).
     :param corpus_path: chemin du fichier texte brut.
@@ -92,6 +92,6 @@ if __name__ == "__main__":
         spm_model=spm_model_path,
         shard_size=100000,
         output_dir="data/processed",
-        dev_ratio=0.1,
+        dev_ratio=0.02,
         shuffle_lines=True
     )
