@@ -12,7 +12,7 @@ class CamembertConfig:
             type_vocab_size=1,
             initializer_range=0.02,
             layer_norm_eps=1e-12,
-            masking_strategy="subword" # ou "whole_word" pour gérer WWM
+            masking_strategy="whole_word" # ou "subword"
     ):
         self.vocab_size = vocab_size
         self.hidden_size = hidden_size
