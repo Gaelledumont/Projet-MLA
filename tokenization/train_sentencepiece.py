@@ -20,6 +20,6 @@ def train_sentencepiece(corpus_path, model_prefix="spm", vocab_size=32000):
     spm.SentencePieceTrainer.Train(spm_cmd)
 
 if __name__ == "__main__":
-    corpus_path = "data/raw/oscar_fr_4GB_cleaned.txt"
+    corpus_path = "data/raw/oscar_fr_4GB_fixed.txt"
     os.makedirs("data/processed", exist_ok=True)
     train_sentencepiece(corpus_path, model_prefix="data/processed/spm", vocab_size=32000)
