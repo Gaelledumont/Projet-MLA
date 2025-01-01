@@ -24,7 +24,7 @@ def main():
     model = CamembertForPreTraining(config)
 
     # 3) On repère les shards
-    shard_paths = sorted(glob.glob("date/processed/tokenized_shards/shard_*.pt"))
+    shard_paths = sorted(glob.glob("data/processed/tokenized_shards_train/shard_*.pt"))
     print(f"Found {len(shard_paths)} shards for pretraining.")
 
     # Shuffle global des shards pour que l'ordre d'itération soit aléatoire
@@ -45,7 +45,7 @@ def main():
     )
 
     # 6) Dataset dev
-    dev_shard = glob.glob("data/processed/dev_shards/shard_*.pt")
+    dev_shard = glob.glob("data/processed/tokenized_shards_dev/shard_*.pt")
     dev_dataset = None
     if dev_shard:
         dev_dataset = MLMDataset(
