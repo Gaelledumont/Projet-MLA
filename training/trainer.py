@@ -83,6 +83,9 @@ class Trainer:
         self.device = torch.device(device)
         print(f"Using device: {self.device}")
 
+        self.train_losses = []
+        self.train_steps = []
+
     def log_gpu_memory(self):
         if torch.cuda.is_available():
             print(f"GPU memory: {torch.cuda.memory_allocated() / 1024 ** 2:.2f}MB allocated, "
@@ -148,6 +151,11 @@ class Trainer:
                     avg_loss = loss_accum / 1000
                     current_lr = self.optimizer.param_groups[0]['lr']
                     print(f"Step {step_count} | Avg Loss = {avg_loss:.4f} | LR = {current_lr:.6e}")
+
+                    # On stocke la loss et le step
+                    self.train_losses.append(avg_loss)
+                    self.train_steps.append(step_count)
+
                     self.log_gpu_memory()
                     loss_accum = 0.0
 
@@ -158,7 +166,12 @@ class Trainer:
 
                 # Checkpointing
                 if step_count % self.checkpoint_steps == 0:
-                    torch.save(self.model.state_dict(), f"checkpoints/checkpoint_{step_count}.pt")
+                    torch.save({'model_state_dict': self.model.state_dict(),
+                                'optimizer_state_dict': self.optimizer.state_dict(),
+                                'scheduler_state_dict': self.scheduler.state_dict(),
+                                'step_count': step_count,
+                                'epoch': epoch,
+                                }, f"checkpoints/checkpoint_{step_count}.pt")
                     print(f"Checkpoint saved at step {step_count}.")
 
                 # Si on a déjà atteint total_steps, on s'arrête
