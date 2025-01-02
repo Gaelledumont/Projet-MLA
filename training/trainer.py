@@ -67,6 +67,8 @@ class Trainer:
         # Si on active la Mixed Precision
         if self.use_amp:
             self.scaler = GradScaler('cuda')
+        else:
+            self.scalar = None
 
         # Si on a un dev_dataset
         if self.dev_dataset is not None:
@@ -81,10 +83,16 @@ class Trainer:
         self.device = torch.device(device)
         print(f"Using device: {self.device}")
 
+    def log_gpu_memory(self):
+        if torch.cuda.is_available():
+            print(f"GPU memory: {torch.cuda.memory_allocated() / 1024 ** 2:.2f}MB allocated, "
+                  f"{torch.cuda.memory_reserved() / 1024 ** 2:.2f}MB reserved")
+
     def train(self):
         self.model.to(self.device)
         print(f"Model moved to {self.device}")
         print(f"Model parameters device: {next(self.model.parameters()).device}")
+        self.log_gpu_memory()
 
         # On vérifie si la mémoire GPU est utilisée
         if torch.cuda.is_available():
@@ -140,6 +148,7 @@ class Trainer:
                     avg_loss = loss_accum / 1000
                     current_lr = self.optimizer.param_groups[0]['lr']
                     print(f"Step {step_count} | Avg Loss = {avg_loss:.4f} | LR = {current_lr:.6e}")
+                    self.log_gpu_memory()
                     loss_accum = 0.0
 
                     # Validation
