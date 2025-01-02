@@ -24,3 +24,8 @@ class PolynomialDecayLR:
             progress = min(max(progress, 0.0), 1.0)  # clamp
             decay = (1 - progress)**self.power
             return (self.base_lrs[param_group_idx] - self.end_learning_rate) * decay + self.end_learning_rate
+
+    def state_dict(self, state_dict):
+        """Retourne l'état du scheduler."""
+        self.current_step = state_dict['current_step']
+        self.base_lrs = state_dict['base_lrs']
