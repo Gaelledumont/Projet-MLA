@@ -33,7 +33,7 @@ def main():
     print(f"Model created with {sum(p.numel() for p in model.parameters())} parameters")
 
     # 3) On repère les shards
-    shard_paths = sorted(glob.glob("data/processed/tokenized_shards_train/shard_*.pt"))
+    shard_paths = sorted(glob.glob("data/processed/tokenized_shards/shard_*.pt"))
     print(f"Found {len(shard_paths)} shards for pretraining.")
 
     # Shuffle global des shards pour que l'ordre d'itération soit aléatoire
@@ -53,6 +53,7 @@ def main():
         spm_processor=tokenizer.sp # pour WWM
     )
 
+    """
     # 6) Dataset dev
     dev_shard = glob.glob("data/processed/tokenized_shards_dev/shard_*.pt")
     dev_dataset = None
@@ -70,6 +71,7 @@ def main():
         print(f"Found {len(dev_shard)} dev shards.")
     else:
         print(f"No dev shard found. Perplexity won't be tracked.")
+    """
 
     # 7) Trainer + scheduler polynomial
     total_steps = 100000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
@@ -85,7 +87,7 @@ def main():
         power=1.0,                  # linéaire
         accumulation_steps=256,
         device='cuda',
-        dev_dataset=dev_dataset,    # dev dataset
+        dev_dataset=None,    # dev_dataset si on veut un dev set
         eval_steps=2000,            # toutes les 2000 steps on calcule la perplexité
         use_amp=True
     )
