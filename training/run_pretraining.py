@@ -1,7 +1,6 @@
 import os
 import glob
 import torch
-import pickle
 from model.camembert_for_pretraining import CamembertForPreTraining, CamembertConfig
 from training.dataset import MLMDataset
 from training.trainer import Trainer
@@ -93,25 +92,17 @@ def main():
         use_amp=True
     )
 
+    log_file_path = "training_log.txt"
+    with open(log_file_path, "w") as log_file:
+        log_file.write("step,loss,lr,val_loss,val_ppl\n")
+
     # 8) On lance l'entraînement
-    trainer.train(0, 0.0) # on va exécuter la boucle tant que step_count < total_steps
+    trainer.train(0, 0.0, log_file_path) # on va exécuter la boucle tant que step_count < total_steps
 
     # 9) On sauvegarde
     os.makedirs("checkpoints", exist_ok=True)
     torch.save(model.state_dict(), "checkpoints/camembert_pretrained_4gb.pt")
     print("Model saved.")
-
-    # Sauvegarde des données de perplexité
-    loss_data = {
-        "train_steps": trainer.train_steps,
-        "train_losses": trainer.train_losses,
-        "val_steps": trainer.val_steps,
-        "val_losses": trainer.val_losses,
-        "val_ppls": trainer.val_ppls
-    }
-    with open("loss_data.pkl", "wb") as f:
-        pickle.dump(loss_data, f)
-    print("Loss data saved.")
 
 if __name__ == "__main__":
     main()

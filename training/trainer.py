@@ -87,18 +87,12 @@ class Trainer:
         self.device = torch.device(device)
         print(f"Using device: {self.device}")
 
-        self.train_losses = []
-        self.train_steps = []
-        self.val_losses = []
-        self.val_ppls = []
-        self.val_steps = []
-
     def log_gpu_memory(self):
         if torch.cuda.is_available():
             print(f"GPU memory: {torch.cuda.memory_allocated() / 1024 ** 2:.2f}MB allocated, "
                   f"{torch.cuda.memory_reserved() / 1024 ** 2:.2f}MB reserved")
 
-    def train(self, start_step=0, initial_loss_accum=0.0):
+    def train(self, start_step=0, initial_loss_accum=0.0, log_file_path=None):
         self.model.to(self.device)
         print(f"Model moved to {self.device}")
         print(f"Model parameters device: {next(self.model.parameters()).device}")
@@ -159,9 +153,10 @@ class Trainer:
                     current_lr = self.optimizer.param_groups[0]['lr']
                     print(f"Step {step_count} | Avg Loss = {avg_loss:.4f} | LR = {current_lr:.6e}")
 
-                    # On stocke la loss et le step
-                    self.train_losses.append(avg_loss)
-                    self.train_steps.append(step_count)
+                    # Enregistrement dans le fichier de log
+                    if log_file_path:
+                        with open(log_file_path, "a") as log_file:
+                            log_file.write(f"{step_count},{avg_loss},{current_lr},-,-\n")  # - pour val_loss et val_ppl
 
                     self.log_gpu_memory()
                     loss_accum = 0.0
@@ -169,12 +164,13 @@ class Trainer:
                     # Validation
                     if self.dev_dataset is not None and (step_count % self.eval_steps == 0):
                         val_loss, val_ppl = self.evaluate_dev()
-                        print(f"  [Dev] loss={val_loss:.4f}, ppl={val_ppl:.2f}")
+                        print(f"[Dev] loss={val_loss:.4f}, ppl={val_ppl:.2f}")
 
-                        # Ajout des valeurs aux listes
-                        self.val_losses.append(val_loss)
-                        self.val_ppls.append(val_ppl)
-                        self.val_steps.append(step_count)
+                        # Enregistrement dans le fichier de log
+                        if log_file_path:
+                            with open(log_file_path, "a") as log_file:
+                                log_file.write(
+                                    f"{step_count},-,{current_lr},{val_loss},{val_ppl}\n")  # On réécrit le step count pour avoir les infos de validation
 
                 # Checkpointing
                 if step_count % self.checkpoint_steps == 0:
