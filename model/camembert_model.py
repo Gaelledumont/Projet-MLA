@@ -186,6 +186,9 @@ class CamembertModel(nn.Module):
         self.apply(lambda module: roberta_init_weights(module, config.initializer_range))
 
     def forward(self, input_ids, attention_mask=None):
+        # On vérifie et déplace les tenseurs si nécessaire
+        device = next(self.parameters()).device
+        input_ids = input_ids.to(device)
         if attention_mask is not None:
             attention_mask = (1 - attention_mask) * -1e4
             attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)
