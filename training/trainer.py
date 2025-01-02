@@ -64,11 +64,15 @@ class Trainer:
             power=self.power,
         )
 
+        # On expose l'optimiseur et le scheduler
+        self.optimizer = self.optimizer
+        self.scheduler = self.scheduler
+
         # Si on active la Mixed Precision
         if self.use_amp:
             self.scaler = GradScaler('cuda')
         else:
-            self.scalar = None
+            self.scaler = None
 
         # Si on a un dev_dataset
         if self.dev_dataset is not None:
@@ -85,13 +89,16 @@ class Trainer:
 
         self.train_losses = []
         self.train_steps = []
+        self.val_losses = []
+        self.val_ppls = []
+        self.val_steps = []
 
     def log_gpu_memory(self):
         if torch.cuda.is_available():
             print(f"GPU memory: {torch.cuda.memory_allocated() / 1024 ** 2:.2f}MB allocated, "
                   f"{torch.cuda.memory_reserved() / 1024 ** 2:.2f}MB reserved")
 
-    def train(self):
+    def train(self, start_step=0, initial_loss_accum=0.0):
         self.model.to(self.device)
         print(f"Model moved to {self.device}")
         print(f"Model parameters device: {next(self.model.parameters()).device}")
@@ -102,8 +109,8 @@ class Trainer:
             print(f"GPU memory allocated: {torch.cuda.memory_allocated() / 1024 ** 2:.2f} MB")
 
         self.model.train()
-        step_count = 0
-        loss_accum = 0.0
+        step_count = start_step
+        loss_accum = initial_loss_accum
 
         # Boucle par epoch
         for epoch in range(1, self.total_epochs + 1):
@@ -164,6 +171,11 @@ class Trainer:
                         val_loss, val_ppl = self.evaluate_dev()
                         print(f"  [Dev] loss={val_loss:.4f}, ppl={val_ppl:.2f}")
 
+                        # Ajout des valeurs aux listes
+                        self.val_losses.append(val_loss)
+                        self.val_ppls.append(val_ppl)
+                        self.val_steps.append(step_count)
+
                 # Checkpointing
                 if step_count % self.checkpoint_steps == 0:
                     torch.save({'model_state_dict': self.model.state_dict(),
@@ -171,6 +183,7 @@ class Trainer:
                                 'scheduler_state_dict': self.scheduler.state_dict(),
                                 'step_count': step_count,
                                 'epoch': epoch,
+                                'loss_accum': loss_accum
                                 }, f"checkpoints/checkpoint_{step_count}.pt")
                     print(f"Checkpoint saved at step {step_count}.")
 
@@ -204,4 +217,5 @@ class Trainer:
         avg_loss = total_loss / total_count if total_count > 0 else 0.0
         ppl = math.exp(avg_loss) if avg_loss < 20 else float("inf") # pour éviter overflow
         self.model.train()
+
         return avg_loss, ppl
