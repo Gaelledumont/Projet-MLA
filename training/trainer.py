@@ -74,8 +74,22 @@ class Trainer:
         else:
             self.dev_dataloader = None
 
+        # Vérification CUDA
+        if not torch.cuda.is_available() and device == 'cuda':
+            raise RuntimeError("CUDA is not available but device='cuda' was specified")
+
+        self.device = torch.device(device)
+        print(f"Using device: {self.device}")
+
     def train(self):
         self.model.to(self.device)
+        print(f"Model moved to {self.device}")
+        print(f"Model parameters device: {next(self.model.parameters()).device}")
+
+        # On vérifie si la mémoire GPU est utilisée
+        if torch.cuda.is_available():
+            print(f"GPU memory allocated: {torch.cuda.memory_allocated() / 1024 ** 2:.2f} MB")
+
         self.model.train()
         step_count = 0
         loss_accum = 0.0
