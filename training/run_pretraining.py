@@ -8,6 +8,14 @@ from tokenization.sentencepiece_tokenizer import SentencePieceTokenizer
 from training.utils import set_seed
 
 def main():
+    # Vérification CUDA
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA is not available. This training requires GPU.")
+
+    print(f"Found {torch.cuda.device_count()} GPU(s)")
+    print(f"Current GPU: {torch.cuda.current_device()}")
+    print(f"GPU name: {torch.cuda.get_device_name()}")
+
     # 1) On fixe la seed pour la reproductibilité
     set_seed(42)
 
@@ -22,6 +30,7 @@ def main():
         masking_strategy="whole_word" # ou "subword"
     )
     model = CamembertForPreTraining(config)
+    print(f"Model created with {sum(p.numel() for p in model.parameters())} parameters")
 
     # 3) On repère les shards
     shard_paths = sorted(glob.glob("data/processed/tokenized_shards_train/shard_*.pt"))
