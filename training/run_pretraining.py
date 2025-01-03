@@ -74,7 +74,7 @@ def main():
     """
 
     # 7) Trainer + scheduler polynomial
-    total_steps = 100000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
+    total_steps = 300000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
     warmup_steps = 10000
     trainer = Trainer(
         model=model,
@@ -87,6 +87,7 @@ def main():
         power=1.0,                  # linéaire
         accumulation_steps=256,
         device='cuda',
+        checkpoint_steps=30000,
         dev_dataset=None,    # dev_dataset si on veut un dev set
         eval_steps=2000,            # toutes les 2000 steps on calcule la perplexité
         use_amp=True
