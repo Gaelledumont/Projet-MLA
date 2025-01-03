@@ -105,10 +105,11 @@ class Trainer:
         self.model.train()
         step_count = start_step
         loss_accum = initial_loss_accum
+        current_epoch = 1 # Ajout d'un compteur d'epoch
 
         # Boucle par epoch
-        for epoch in range(1, self.total_epochs + 1):
-            print(f"===== EPOCH {epoch}/{self.total_epochs} =====")
+        while current_epoch <= self.total_epochs:
+            print(f"===== EPOCH {current_epoch}/{self.total_epochs} =====")
 
             # On affiche une barre de progression sur l'epoch
             for batch_idx, (input_ids, attention_mask, labels) in enumerate(tqdm(self.dataloader), start=1):
@@ -178,7 +179,7 @@ class Trainer:
                                 'optimizer_state_dict': self.optimizer.state_dict(),
                                 'scheduler_state_dict': self.scheduler.state_dict(),
                                 'step_count': step_count,
-                                'epoch': epoch,
+                                'epoch': current_epoch,
                                 'loss_accum': loss_accum
                                 }, f"checkpoints/checkpoint_{step_count}.pt")
                     print(f"Checkpoint saved at step {step_count}.")
@@ -188,12 +189,14 @@ class Trainer:
                     print(f"Reached total steps={self.total_steps}, stopping.")
                     break
 
+            current_epoch += 1 # On oncrémente le compteur d'epoch
+
             # On boucle sur le dataset "à l'infini" jusqu'au nombre total d'étapes
 
             if step_count >= self.total_steps:
                 break
 
-        print(f"Training complete after {step_count} steps.")
+        print(f"Training complete after {step_count} steps (and {current_epoch-1} epochs).")
 
     def evaluate_dev(self):
         # Petit calcul de la loss (et perplexité) sur dev
