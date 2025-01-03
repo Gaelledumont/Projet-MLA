@@ -57,7 +57,7 @@ CamemBERT-Reproduction/
 - Configurer l'objectif de **Masked Language Modeling (MLM)**.
 - Lancer l'entraînement sur un GPU avec des données de 4 Go et 138 Go :
   ```bash
-  python train.py --data_path data/oscar_4gb.txt --epochs 10 --batch_size 32
+  python run_pretraining.py --data_path data/oscar_4gb.txt --epochs 10 --batch_size 32
   ```
 
 ### 4. **Évaluation sur des tâches aval :**
