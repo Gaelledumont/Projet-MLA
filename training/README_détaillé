@@ -1,0 +1,100 @@
+# Camembert Implementation
+
+Ce projet implémente une architecture Camembert, un modèle de type Transformer basé sur RoBERTa, spécialement adapté pour le traitement de la langue française. Voici une vue d'ensemble des fichiers et des composants principaux du projet.
+
+## Table des matières
+1. [CamembertConfig](#camembertconfig)
+2. [Composants du Modèle](#composants-du-modèle)
+   - [CamembertEmbeddings](#camembertembeddings)
+   - [CamembertSelfAttention](#camembertselfattention)
+   - [CamembertEncoder](#camembertencoder)
+   - [CamembertModel](#camembertmodel)
+3. [Applications](#applications)
+   - [CamembertForPreTraining](#camembertforpretraining)
+   - [CamembertForTokenClassification](#camembertfortokenclassification)
+4. [Initialisation des poids](#initialisation-des-poids)
+5. [Notes supplémentaires](#notes-supplémentaires)
+
+---
+
+## CamembertConfig
+La classe `CamembertConfig` définit les hyperparamètres du modèle. Voici les principaux attributs :
+
+- **`vocab_size`** : Taille du vocabulaire (par défaut : 32 000).
+- **`hidden_size`** : Dimension des représentations cachées.
+- **`num_hidden_layers`** : Nombre de couches dans l'encodeur Transformer.
+- **`num_attention_heads`** : Nombre de têtes d'attention.
+- **`intermediate_size`** : Taille du feed-forward interne dans chaque couche.
+- **`hidden_dropout_prob` et `attention_probs_dropout_prob`** : Probabilités de dropout pour éviter le surapprentissage.
+- **`max_position_embeddings`** : Longueur maximale des séquences prises en charge.
+- **`masking_strategy`** : Stratégie de masquage (par défaut : `whole_word`).
+
+---
+
+## Composants du Modèle
+
+### CamembertEmbeddings
+Cette classe gère l'incorporation des mots et des positions dans des vecteurs d'embedding.
+
+- Combine les embeddings de mots (`word_embedding`) et de position (`position_embedding`).
+- Applique une normalisation par couches (`LayerNorm`) et un dropout.
+- Conserve les informations de position et de sens des tokens.
+
+### CamembertSelfAttention
+Implémente le mécanisme d'attention multi-têtes.
+
+- Calcule les matrices **Query**, **Key**, et **Value**.
+- Effectue un produit scalaire pour calculer les scores d'attention.
+- Applique un dropout pour stabiliser l'entraînement.
+
+### CamembertEncoder
+Construit l'encodeur complet en empilant plusieurs couches `CamembertLayer`.
+
+- Chaque couche inclut un module d'attention et un module feed-forward.
+- Les représentations sont mises à jour à chaque couche.
+
+### CamembertModel
+Structure globale combinant les embeddings et l'encodeur Transformer complet.
+
+- Prépare les tenseurs d'entrée (id des tokens et masque d'attention).
+- Passe les données à travers les embeddings et l'encodeur.
+
+---
+
+## Applications
+
+### CamembertForPreTraining
+Un modèle pour la pré-formation avec deux composants principaux :
+
+1. **`CamembertModel`** : Base Transformer pour extraire les représentations des séquences.
+2. **`lm_head`** : Une tête de prédiction du langage (linear layer) pour générer des logits correspondant aux tokens dans le vocabulaire.
+
+### CamembertForTokenClassification
+Modèle pour des tâches comme l'étiquetage de séquences (NER, POS tagging, etc.).
+
+- Utilise le `CamembertModel` comme base.
+- Ajoute une couche de classification au-dessus pour prédire les étiquettes des tokens.
+- Gère les pertes avec une fonction `CrossEntropyLoss`.
+
+---
+
+## Initialisation des poids
+
+La fonction `roberta_init_weights` initialise les poids du modèle :
+
+- Les poids des couches linéaires et des embeddings sont initialisés avec une distribution normale.
+- Les biais sont initialisés à zéro.
+- Les poids du vecteur de padding sont réinitialisés à zéro.
+
+---
+
+## Notes supplémentaires
+
+1. **Embeddings** : Les embeddings des mots sont initialisés aléatoirement puis ajustés durant l'entraînement pour capturer le sens des mots et leur contexte.
+2. **Attention** : Le mécanisme d'attention aide le modèle à se concentrer sur les parties importantes de la séquence.
+3. **Références et ressources** :
+   - [Vidéo sur les encodings positionnels](https://www.youtube.com/watch?v=dichIcUZfOw).
+   - Article Medium sur l'attention : [Self-Attention Explained](https://medium.com/@geetkal67/attention-networks-a-simple-way-to-understand-self-attention-f5fb363c736d).
+
+Ce README fournit une vue d'ensemble pour naviguer et comprendre le projet. Pour des exemples d'utilisation ou des tests, veuillez vous référer à la documentation ou aux fichiers correspondants.
+
