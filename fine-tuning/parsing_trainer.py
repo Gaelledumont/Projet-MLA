@@ -45,7 +45,7 @@ class ParsingDataset(Dataset):
     def __getitem__(self, idx):
         tokens, heads, rels = self.samples[idx]
         # on encode les tokens en subwords
-        # On va faire la concat subwords de chaque token => input_ids
+        # On va faire la concaténation subwords de chaque token => input_ids
         input_ids=[2]
         new_heads=[]
         new_rels=[]
