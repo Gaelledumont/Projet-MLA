@@ -115,7 +115,6 @@ class CamembertForParsing(nn.Module):
         # On fait un gather manuellement:
         batch_idx = torch.arange(bsz).unsqueeze(-1).expand(bsz, seq_len).to(rel_logits.device)
         tok_idx   = torch.arange(seq_len).unsqueeze(0).expand(bsz, seq_len).to(rel_logits.device)
-        # shape: (batch, seq_len, n_rels)
         rel_score_for_gold_arc = rel_logits.permute(0,2,3,1)
         heads_ = heads.clone()
         heads_[heads_<0]=0
