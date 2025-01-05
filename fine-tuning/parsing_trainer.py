@@ -99,8 +99,8 @@ def train_parsing(
     rel_mlp_layers=2,
     n_rels=30,
     lr=1e-4,
-    epochs=30,
-    batch_size=32,
+    epochs=10,
+    batch_size=16,
     device='cuda'
 ):
     # On charge Camembert pré-entraîné

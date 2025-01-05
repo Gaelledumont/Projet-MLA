@@ -69,7 +69,7 @@ def train_pos(
     num_labels,
     lr=3e-5,
     epochs=3,
-    batch_size=32,
+    batch_size=16,
     device="cuda"
 ):
     # On charge le modèle
