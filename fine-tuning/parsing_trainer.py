@@ -21,7 +21,6 @@ class ParsingDataset(Dataset):
                         self.samples.append((tokens, heads, rels))
                         tokens, heads, rels=[],[],[]
                     continue
-                # ex: "1\tLe\t0\tracine"
                 splits=line.split("\t")
                 # splits[0] => index
                 # splits[1] => token
