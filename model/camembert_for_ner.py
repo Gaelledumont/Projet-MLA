@@ -1,5 +1,5 @@
 import torch.nn as nn
-from .camembert_for_pretraining import CamembertForPreTraining
+from model.camembert_for_pretraining import CamembertForPreTraining
 
 class CamembertForNER(nn.Module):
     """
