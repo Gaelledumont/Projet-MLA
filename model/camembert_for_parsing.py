@@ -111,7 +111,7 @@ class CamembertForParsing(nn.Module):
         arc_loss_fct = nn.CrossEntropyLoss()
         arc_loss = arc_loss_fct(arc_logits_2d, gold_heads)
 
-        # on index par heads => on obtient (batch, seq_len, n_rels)
+        # on index par heads
         # On fait un gather manuellement:
         batch_idx = torch.arange(bsz).unsqueeze(-1).expand(bsz, seq_len).to(rel_logits.device)
         tok_idx   = torch.arange(seq_len).unsqueeze(0).expand(bsz, seq_len).to(rel_logits.device)
