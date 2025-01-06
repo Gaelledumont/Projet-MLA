@@ -198,6 +198,20 @@ class Trainer:
 
         print(f"Training complete after {step_count} steps (and {current_epoch-1} epochs).")
 
+    def load_checkpoint(self, checkpoint_path):
+        """
+        Charge un checkpoint et restaure l'état du modèle, de l'optimiseur et du scheduler
+        """
+        checkpoint = torch.load(checkpoint_path)
+        self.model.load_state_dict(checkpoint['model_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+        step_count = checkpoint['step_count']
+        loss_accum = checkpoint['loss_accum']
+
+        print(f"Loaded checkpoint from {checkpoint_path} at step {step_count}.")
+        return step_count, loss_accum
+
     def evaluate_dev(self):
         # Petit calcul de la loss (et perplexité) sur dev
         self.model.eval()
