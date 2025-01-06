@@ -91,25 +91,12 @@ def main():
         use_amp=True
     )
 
-    # On charge un checkpoint si disponible
-    checkpoint_dir = "checkpoints"
-    latest_checkpoint = None
-    if os.path.exists(checkpoint_dir):
-        checkpoints = glob.glob(os.path.join(checkpoint_dir, "checkpoint_*.pt"))
-        if checkpoints:
-            latest_checkpoint = max(checkpoints, key=os.path.getctime)
-
-    start_step = 0
-    loss_accum = 0.0
-    if latest_checkpoint:
-        start_step, loss_accum = trainer.load_checkpoint(latest_checkpoint)
-
-    log_file_path = "pretraining_resumed_log.txt"
+    log_file_path = "training_log.txt"
     with open(log_file_path, "w") as log_file:
         log_file.write("step,loss,lr,val_loss,val_ppl\n")
 
     # 8) On lance l'entraînement
-    trainer.train(start_step, loss_accum, log_file_path) # on va exécuter la boucle tant que step_count < total_steps
+    trainer.train(0, 0.0, log_file_path) # on va exécuter la boucle tant que step_count < total_steps
 
     # 9) On sauvegarde
     os.makedirs("checkpoints", exist_ok=True)
