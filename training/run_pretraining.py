@@ -33,7 +33,7 @@ def main():
     print(f"Model created with {sum(p.numel() for p in model.parameters())} parameters")
 
     # 3) On repère les shards
-    shard_paths = sorted(glob.glob("data/processed/tokenized_shards_train/shard_*.pt"))
+    shard_paths = sorted(glob.glob("data/processed/tokenized_shards/shard_*.pt"))
     print(f"Found {len(shard_paths)} shards for pretraining.")
 
     # Shuffle global des shards pour que l'ordre d'itération soit aléatoire
@@ -53,7 +53,7 @@ def main():
         spm_processor=tokenizer.sp # pour WWM
     )
 
-    # 6) Dataset dev
+    """# 6) Dataset dev
     dev_shard = glob.glob("data/processed/tokenized_shards_dev/shard_*.pt")
     dev_dataset = None
     if dev_shard:
@@ -69,10 +69,10 @@ def main():
         )
         print(f"Found {len(dev_shard)} dev shards.")
     else:
-        print(f"No dev shard found. Perplexity won't be tracked.")
+        print(f"No dev shard found. Perplexity won't be tracked.")"""
 
     # 7) Trainer + scheduler polynomial
-    total_steps = 100000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
+    total_steps = 300000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
     warmup_steps = 10000
     trainer = Trainer(
         model=model,
@@ -85,8 +85,8 @@ def main():
         power=1.0,                  # linéaire
         accumulation_steps=256,
         device='cuda',
-        checkpoint_steps=10000,
-        dev_dataset=dev_dataset,    # dev_dataset si on veut un dev set
+        checkpoint_steps=30000,
+        dev_dataset=None,    # dev_dataset si on veut un dev set
         eval_steps=2000,            # toutes les 2000 steps on calcule la perplexité
         use_amp=True
     )
@@ -104,7 +104,7 @@ def main():
     if latest_checkpoint:
         start_step, loss_accum = trainer.load_checkpoint(latest_checkpoint)
 
-    log_file_path = "training_log.txt"
+    log_file_path = "pretraining_resumed_log.txt"
     with open(log_file_path, "w") as log_file:
         log_file.write("step,loss,lr,val_loss,val_ppl\n")
 
@@ -112,8 +112,8 @@ def main():
     trainer.train(start_step, loss_accum, log_file_path) # on va exécuter la boucle tant que step_count < total_steps
 
     # 9) On sauvegarde
-    os.makedirs("ckpts", exist_ok=True)
-    torch.save(model.state_dict(), "ckpts/camembert_pretrained_4gb.pt")
+    os.makedirs("checkpoints", exist_ok=True)
+    torch.save(model.state_dict(), "checkpoints/camembert_pretrained_4gb.pt")
     print("Model saved.")
 
 if __name__ == "__main__":
