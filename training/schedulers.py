@@ -31,3 +31,8 @@ class PolynomialDecayLR:
             'current_step': self.current_step,
             'base_lrs': self.base_lrs,
         }
+
+    def load_state_dict(self, state_dict):
+        """Charge l'état du scheduler."""
+        self.current_step = state_dict['current_step']
+        self.base_lrs = state_dict['base_lrs']
