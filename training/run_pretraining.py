@@ -72,7 +72,7 @@ def main():
         print(f"No dev shard found. Perplexity won't be tracked.")
 
     # 7) Trainer + scheduler polynomial
-    total_steps = 100000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
+    total_steps = 400000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
     warmup_steps = 10000
     trainer = Trainer(
         model=model,
@@ -85,7 +85,7 @@ def main():
         power=1.0,                  # linéaire
         accumulation_steps=256,
         device='cuda',
-        checkpoint_steps=10000,
+        checkpoint_steps=50000,
         dev_dataset=dev_dataset,    # dev_dataset si on veut un dev set
         eval_steps=2000,            # toutes les 2000 steps on calcule la perplexité
         use_amp=True
