@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 from .camembert_model import CamembertModel, roberta_init_weights
 from .camembert_config import CamembertConfig
@@ -21,3 +22,13 @@ class CamembertForPreTraining(nn.Module):
             loss = loss_fct(logits.view(-1, self.camembert.config.vocab_size), labels.view(-1))
 
         return logits, loss
+
+    @classmethod
+    def load_pretrained(cls, path, device='cuda'):
+        # On charge un modèle pré-entraîné
+        state = torch.load(path, map_location=device)
+        config = CamembertConfig()
+        model = cls(config)
+        model.load_state_dict(state)
+        model.to(device)
+        return model
