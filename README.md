@@ -50,7 +50,7 @@ CamemBERT-Reproduction/
 - Nettoyer et tokenizer avec **SentencePiece**.
   
 ### 2. **Implémentation du modèle :**
-- Reproduire l'architecture RoBERTa en utilisant TensorFlow ou PyTorch.
+- Reproduire l'architecture RoBERTa en utilisant PyTorch.
 - Implémenter le masquage dynamique des mots entiers (Whole-Word Masking).
 
 ### 3. **Entraînement :**
