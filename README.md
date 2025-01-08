@@ -27,7 +27,6 @@ This project aims to replicate the experimental results of the paper *CamemBERT:
 
 ```bash
 pip install torch torchvision transformers
-pip install tensorflow
 pip install sentencepiece
 ```
 
@@ -57,7 +56,7 @@ CamemBERT-Reproduction/
 
 ### 2. **Model Implementation**
 
-- Recreate the RoBERTa architecture using PyTorch.
+- Recreate the CamemBERT architecture using PyTorch.
 - Implement dynamic whole-word masking.
 
 ### 3. **Training**
@@ -82,25 +81,6 @@ python evaluate.py --task pos_tagging --model_path models/camembert_base.pt
 
 - Compare performance with existing models (**mBERT**, **XLM-R**).
 - Analyze the impact of corpus size and origin on results.
-
-### 6. **Write the LaTeX Report**
-
-- Present the architecture, differences from the original paper, and experimental results.
-- Justify design choices and discuss findings.
-
-### 7. **Create a Presentation Video**
-
-- Record a 5-minute video explaining the project and results.
-  - **Ensure all team members participate.**
-
----
-
-## 📊 **Expected Results**
-
-- Faithful reproduction of the paper's results.
-- Validation of performance on various NLP tasks.
-- Critical comparison with benchmark models.
-
 ---
 
 ## 💡 **Useful Resources**
