@@ -1,26 +1,30 @@
 # Projet-MLA
 
-# Reproduction du modèle CamemBERT
+## Reproducing the CamemBERT Model
 
-Ce projet vise à reproduire les résultats expérimentaux de l'article *CamemBERT: a Tasty French Language Model*. Il s'agit d'implémenter en TensorFlow ou PyTorch l'architecture proposée et de valider ses performances sur plusieurs tâches NLP en utilisant un GPU.
-
----
-
-## 📋 **Objectifs du projet :**
-- Implémenter l'architecture CamemBERT (basée sur RoBERTa) pour le français.
-- Entraîner le modèle sur des corpus diversifiés (OSCAR).
-- Évaluer les performances sur des tâches de NLP : POS tagging, parsing, NER, et NLI.
-- Comparer les résultats avec ceux de l'article original.
+This project aims to replicate the experimental results of the paper *CamemBERT: a Tasty French Language Model*. The goal is to implement the proposed architecture in TensorFlow or PyTorch and validate its performance on various NLP tasks using a GPU.
 
 ---
 
-## 🛠️ **Prérequis :**
-### **Environnement de développement :**
-- **Langage** : Python 3.8+
-- **Framework** : PyTorch
-- **GPU** : CUDA / cuDNN installés pour l'accélération matérielle
+## 📊 **Project Objectives**
 
-### **Bibliothèques nécessaires :**
+- Implement the CamemBERT architecture (based on RoBERTa) for the French language.
+- Train the model on diverse corpora, including OSCAR.
+- Evaluate performance on NLP tasks: POS tagging, parsing, NER, and NLI.
+- Compare the results with those of the original paper.
+
+---
+
+## 🔧 **Prerequisites**
+
+### **Development Environment**
+
+- **Language**: Python 3.8+
+- **Framework**: PyTorch
+- **GPU**: CUDA / cuDNN installed for hardware acceleration
+
+### **Required Libraries**
+
 ```bash
 pip install torch torchvision transformers
 pip install tensorflow
@@ -29,168 +33,189 @@ pip install sentencepiece
 
 ---
 
-## 📂 **Structure du projet :**
+## 📂 **Project Structure**
+
 ```plaintext
 CamemBERT-Reproduction/
-│
-├── data/                  # Données prétraitées (OSCAR, CCNet, etc.)
-├── models/                # Enregistrements des modèles entraînés
-├── scripts/               # Scripts d'entraînement et d'évaluation
-├── notebooks/             # Analyse des résultats et visualisations
-├── report/                # Rapport LaTeX (6-8 pages)
-└── README.md              # Documentation du projet
+🔽
+├── data/                  # Preprocessed datasets (OSCAR, CCNet, etc.)
+├── models/                # Trained model checkpoints
+├── scripts/               # Training and evaluation scripts
+├── notebooks/             # Analysis and visualizations
+├── report/                # LaTeX report (6-8 pages)
+└── README.md              # Project documentation
 ```
 
 ---
 
-## 🚀 **Étapes de reproduction :**
+## 🚀 **Steps to Reproduce**
 
-### 1. **Prétraitement des données :**
-- Télécharger le corpus OSCAR français.
-- Nettoyer et tokenizer avec **SentencePiece**.
-  
-### 2. **Implémentation du modèle :**
-- Reproduire l'architecture RoBERTa en utilisant PyTorch.
-- Implémenter le masquage dynamique des mots entiers (Whole-Word Masking).
+### 1. **Data Preparation**
 
-### 3. **Entraînement :**
-- Configurer l'objectif de **Masked Language Modeling (MLM)**.
-- Lancer l'entraînement sur un GPU avec des données de 4 Go et 138 Go :
-  ```bash
-  python run_pretraining.py --data_path data/oscar_4gb.txt --epochs 10 --batch_size 32
-  ```
+- Download the French OSCAR corpus.
+- Clean and tokenize the data using **SentencePiece**.
 
-### 4. **Évaluation sur des tâches aval :**
-- Implémenter les tâches POS tagging, NER, parsing, et NLI.
-- Utiliser des benchmarks comme **Universal Dependencies (UD)** et **XNLI** :
-  ```bash
-  python evaluate.py --task pos_tagging --model_path models/camembert_base.pt
-  ```
+### 2. **Model Implementation**
 
-### 5. **Comparaison des résultats :**
-- Comparer les performances avec les modèles existants (**mBERT**, **XLM-R**).
-- Analyser l'impact de la taille et de l'origine du corpus sur les résultats.
+- Recreate the RoBERTa architecture using PyTorch.
+- Implement dynamic whole-word masking.
 
-### 6. **Rédaction du rapport LaTeX :**
-- Présenter l'architecture, les différences avec l'article, et les résultats obtenus.
-- Justifier les choix de conception et discuter les résultats expérimentaux.
+### 3. **Training**
 
-### 7. **Création de la vidéo de présentation :**
-- Enregistrer une vidéo de 5 minutes expliquant le projet et les résultats.
-  - **Tous les participants doivent prendre la parole.**
+- Set up the **Masked Language Modeling (MLM)** objective.
+- Train the model on a GPU using both a small sample (4 GB) and a full dataset (138 GB):
+
+```bash
+python run_pretraining.py --data_path data/oscar_4gb.txt --epochs 10 --batch_size 32
+```
+
+### 4. **Evaluation on Downstream Tasks**
+
+- Implement NLP tasks: POS tagging, NER, parsing, and NLI.
+- Use benchmarks like **Universal Dependencies (UD)** and **XNLI**:
+
+```bash
+python evaluate.py --task pos_tagging --model_path models/camembert_base.pt
+```
+
+### 5. **Compare Results**
+
+- Compare performance with existing models (**mBERT**, **XLM-R**).
+- Analyze the impact of corpus size and origin on results.
+
+### 6. **Write the LaTeX Report**
+
+- Present the architecture, differences from the original paper, and experimental results.
+- Justify design choices and discuss findings.
+
+### 7. **Create a Presentation Video**
+
+- Record a 5-minute video explaining the project and results.
+  - **Ensure all team members participate.**
 
 ---
 
-## 📈 **Résultats attendus :**
-- Reproduction fidèle des résultats de l'article.
-- Validation des performances sur différentes tâches NLP.
-- Comparaison critique des performances avec les modèles de référence.
+## 📊 **Expected Results**
+
+- Faithful reproduction of the paper's results.
+- Validation of performance on various NLP tasks.
+- Critical comparison with benchmark models.
 
 ---
 
-## 💡 **Ressources utiles :**
-- [Article CamemBERT](https://arxiv.org/abs/1911.03894)
-- [Corpus OSCAR](https://oscar-corpus.com/)
-- [Documentation Hugging Face](https://huggingface.co/docs)
+## 💡 **Useful Resources**
 
--------------------------------------------------------------------
+- [CamemBERT Paper](https://arxiv.org/abs/1911.03894)
+- [OSCAR Corpus](https://oscar-corpus.com/)
+- [Hugging Face Documentation](https://huggingface.co/docs)
 
-# Camembert Implementation
+---
 
-Ce projet implémente une architecture Camembert, un modèle de type Transformer basé sur RoBERTa, spécialement adapté pour le traitement de la langue française. Voici une vue d'ensemble des fichiers et des composants principaux du projet.
+# CamemBERT Implementation Details
 
-## Table des matières
-1. [CamembertConfig](#camembertconfig)
-2. [Composants du Modèle](#composants-du-modèle)
-   - [CamembertEmbeddings](#camembertembeddings)
-   - [CamembertSelfAttention](#camembertselfattention)
-   - [CamembertEncoder](#camembertencoder)
-   - [CamembertModel](#camembertmodel)
+This project implements a CamemBERT architecture, a Transformer-based model (similar to RoBERTa) tailored for the French language. Below is a detailed overview of the main components and files in the project.
+
+## Table of Contents
+
+1. [CamemBERTConfig](#camembertconfig)
+2. [Model Components](#model-components)
+   - [CamemBERTEmbeddings](#camembertembeddings)
+   - [CamemBERTSelfAttention](#camembertselfattention)
+   - [CamemBERTEncoder](#camembertencoder)
+   - [CamemBERTModel](#camembertmodel)
 3. [Applications](#applications)
-   - [CamembertForPreTraining](#camembertforpretraining)
-   - [CamembertForTokenClassification](#camembertfortokenclassification)
-4. [Initialisation des poids](#initialisation-des-poids)
-5. [Notes supplémentaires](#notes-supplémentaires)
+   - [CamemBERTForPreTraining](#camembertforpretraining)
+   - [CamemBERTForTokenClassification](#camembertfortokenclassification)
+4. [Weight Initialization](#weight-initialization)
+5. [Additional Notes](#additional-notes)
 
 ---
 
-## CamembertConfig
-La classe `CamembertConfig` définit les hyperparamètres du modèle. Voici les principaux attributs :
+## CamemBERTConfig
 
-- **`vocab_size`** : Taille du vocabulaire (par défaut : 32 000).
-- **`hidden_size`** : Dimension des représentations cachées.
-- **`num_hidden_layers`** : Nombre de couches dans l'encodeur Transformer.
-- **`num_attention_heads`** : Nombre de têtes d'attention.
-- **`intermediate_size`** : Taille du feed-forward interne dans chaque couche.
-- **`hidden_dropout_prob` et `attention_probs_dropout_prob`** : Probabilités de dropout pour éviter le surapprentissage.
-- **`max_position_embeddings`** : Longueur maximale des séquences prises en charge.
-- **`masking_strategy`** : Stratégie de masquage (par défaut : `whole_word`).
+The `CamemBERTConfig` class defines the model's hyperparameters. Key attributes include:
+
+- **`vocab_size`**: Vocabulary size (default: 32,000).
+- **`hidden_size`**: Dimension of hidden representations.
+- **`num_hidden_layers`**: Number of layers in the Transformer encoder.
+- **`num_attention_heads`**: Number of attention heads.
+- **`intermediate_size`**: Size of the feed-forward network in each layer.
+- **`hidden_dropout_prob` and `attention_probs_dropout_prob`**: Dropout probabilities to prevent overfitting.
+- **`max_position_embeddings`**: Maximum sequence length supported.
+- **`masking_strategy`**: Masking strategy (default: `whole_word`).
 
 ---
 
-## Composants du Modèle
+## Model Components
 
-### CamembertEmbeddings
-Cette classe gère l'incorporation des mots et des positions dans des vecteurs d'embedding.
+### CamemBERTEmbeddings
 
-- Combine les embeddings de mots (`word_embedding`) et de position (`position_embedding`).
-- Applique une normalisation par couches (`LayerNorm`) et un dropout.
-- Conserve les informations de position et de sens des tokens.
+Manages token and positional embeddings:
 
-### CamembertSelfAttention
-Implémente le mécanisme d'attention multi-têtes.
+- Combines word (`word_embedding`) and positional embeddings (`position_embedding`).
+- Applies layer normalization (`LayerNorm`) and dropout.
+- Preserves positional and semantic token information.
 
-- Calcule les matrices **Query**, **Key**, et **Value**.
-- Effectue un produit scalaire pour calculer les scores d'attention.
-- Applique un dropout pour stabiliser l'entraînement.
+### CamemBERTSelfAttention
 
-### CamembertEncoder
-Construit l'encodeur complet en empilant plusieurs couches `CamembertLayer`.
+Implements the multi-head attention mechanism:
 
-- Chaque couche inclut un module d'attention et un module feed-forward.
-- Les représentations sont mises à jour à chaque couche.
+- Computes **Query**, **Key**, and **Value** matrices.
+- Calculates attention scores via scaled dot-product.
+- Applies dropout for stability.
 
-### CamembertModel
-Structure globale combinant les embeddings et l'encodeur Transformer complet.
+### CamemBERTEncoder
 
-- Prépare les tenseurs d'entrée (id des tokens et masque d'attention).
-- Passe les données à travers les embeddings et l'encodeur.
+Builds the complete encoder by stacking multiple `CamemBERTLayer` instances:
+
+- Each layer includes an attention module and a feed-forward network.
+- Updates token representations iteratively across layers.
+
+### CamemBERTModel
+
+Combines embeddings and the full Transformer encoder:
+
+- Prepares input tensors (token IDs and attention masks).
+- Passes data through embeddings and the encoder.
 
 ---
 
 ## Applications
 
-### CamembertForPreTraining
-Un modèle pour la pré-formation avec deux composants principaux :
+### CamemBERTForPreTraining
 
-1. **`CamembertModel`** : Base Transformer pour extraire les représentations des séquences.
-2. **`lm_head`** : Une tête de prédiction du langage (linear layer) pour générer des logits correspondant aux tokens dans le vocabulaire.
+A model designed for pre-training with two main components:
 
-### CamembertForTokenClassification
-Modèle pour des tâches comme l'étiquetage de séquences (NER, POS tagging, etc.).
+1. **`CamemBERTModel`**: Base Transformer for extracting sequence representations.
+2. **`lm_head`**: A prediction head (linear layer) for generating logits for vocabulary tokens.
 
-- Utilise le `CamembertModel` comme base.
-- Ajoute une couche de classification au-dessus pour prédire les étiquettes des tokens.
-- Gère les pertes avec une fonction `CrossEntropyLoss`.
+### CamemBERTForTokenClassification
 
----
+Specialized for sequence labeling tasks (e.g., NER, POS tagging):
 
-## Initialisation des poids
-
-La fonction `roberta_init_weights` initialise les poids du modèle :
-
-- Les poids des couches linéaires et des embeddings sont initialisés avec une distribution normale.
-- Les biais sont initialisés à zéro.
-- Les poids du vecteur de padding sont réinitialisés à zéro.
+- Uses `CamemBERTModel` as the base.
+- Adds a classification layer for token label prediction.
+- Computes loss with `CrossEntropyLoss`.
 
 ---
 
-## Notes supplémentaires
+## Weight Initialization
 
-1. **Embeddings** : Les embeddings des mots sont initialisés aléatoirement puis ajustés durant l'entraînement pour capturer le sens des mots et leur contexte.
-2. **Attention** : Le mécanisme d'attention aide le modèle à se concentrer sur les parties importantes de la séquence.
-3. **Références et ressources** :
-   - [Vidéo sur les encodings positionnels](https://www.youtube.com/watch?v=dichIcUZfOw).
-   - Article Medium sur l'attention : [Self-Attention Explained](https://medium.com/@geetkal67/attention-networks-a-simple-way-to-understand-self-attention-f5fb363c736d).
+The `roberta_init_weights` function initializes model weights:
 
-Ce README fournit une vue d'ensemble pour naviguer et comprendre le projet. Pour des exemples d'utilisation ou des tests, veuillez vous référer à la documentation ou aux fichiers correspondants.
+- Linear layer and embedding weights are initialized with a normal distribution.
+- Biases are set to zero.
+- Padding vector weights are reset to zero.
+
+---
+
+## Additional Notes
+
+1. **Embeddings**: Word embeddings are randomly initialized and fine-tuned during training to capture word meaning and context.
+2. **Attention**: The attention mechanism helps the model focus on important parts of the sequence.
+3. **References and Resources**:
+   - [Video on Positional Encodings](https://www.youtube.com/watch?v=dichIcUZfOw).
+   - Medium Article: [Self-Attention Explained](https://medium.com/@geetkal67/attention-networks-a-simple-way-to-understand-self-attention-f5fb363c736d).
+
+This README provides a comprehensive overview of the project. For usage examples or tests, refer to the documentation or corresponding files.
+
