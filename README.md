@@ -213,9 +213,3 @@ The `roberta_init_weights` function initializes model weights:
 
 1. **Embeddings**: Word embeddings are randomly initialized and fine-tuned during training to capture word meaning and context.
 2. **Attention**: The attention mechanism helps the model focus on important parts of the sequence.
-3. **References and Resources**:
-   - [Video on Positional Encodings](https://www.youtube.com/watch?v=dichIcUZfOw).
-   - Medium Article: [Self-Attention Explained](https://medium.com/@geetkal67/attention-networks-a-simple-way-to-understand-self-attention-f5fb363c736d).
-
-This README provides a comprehensive overview of the project. For usage examples or tests, refer to the documentation or corresponding files.
-
