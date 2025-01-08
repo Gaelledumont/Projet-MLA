@@ -16,8 +16,8 @@ Ce projet vise à reproduire les résultats expérimentaux de l'article *CamemBE
 
 ## 🛠️ **Prérequis :**
 ### **Environnement de développement :**
-- **Langages** : Python 3.8+
-- **Frameworks** : TensorFlow / PyTorch
+- **Langage** : Python 3.8+
+- **Framework** : PyTorch
 - **GPU** : CUDA / cuDNN installés pour l'accélération matérielle
 
 ### **Bibliothèques nécessaires :**
