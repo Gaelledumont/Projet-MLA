@@ -12,10 +12,10 @@ label2id = {"entailment": 0, "neutral": 1, "contradiction": 2}
 tokenizer = "data/processed/spm.model"
 
 model = train_nli(
-    model_path="camembert_pretrained_4gb/data",
+    model_path="camembert_pretrained_4gb.pt",
     train_path="xnli_french_train.tsv",
     dev_path="xnli_french_val.tsv",
     tokenizer=tokenizer,
     label2id=label2id,
-    device="cuda"
+    device="cpu"
 )
