@@ -1,5 +1,4 @@
 from datasets import load_dataset
-from transformers import CamembertTokenizer
 from fine_tuning.nli_trainer import train_nli
 
 # xnli_train = load_dataset("xnli", "fr", split="train")
