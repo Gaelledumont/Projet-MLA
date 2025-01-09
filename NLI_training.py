@@ -10,7 +10,7 @@ tokenizer = SentencePieceTokenizer("data/processed/spm.model")
 # xnli_train.to_csv("xnli_french_train.tsv", sep="\t", index=False)
 # xnli_val.to_csv("xnli_french_val.tsv", sep="\t", index=False)
 
-label2id = {"entailment": 0, "neutral": 1, "contradiction": 2}
+label2id = {"0": 0, "1": 1, "2": 2}
 
 model = train_nli(
     model_path="camembert_pretrained_4gb.pt",
