@@ -20,9 +20,11 @@ class POSDataset(Dataset):
                         self.samples.append((tokens,labels))
                         tokens,labels=[],[]
                     continue
-                splits=line.split("\t")
-                t=splits[0]
-                lab=splits[1]
+                splits = line.split("\t")
+                if len(splits) < 4 or line.startswith("#"):  # Ignore les lignes de commentaire ou malformées
+                    continue
+                t = splits[1]  # Token
+                lab = splits[3]  # UPOS
                 tokens.append(t)
                 labels.append(lab)
             if tokens:
