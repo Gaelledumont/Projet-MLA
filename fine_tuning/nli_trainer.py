@@ -82,4 +82,5 @@ def train_nli(model_path, train_path, dev_path, tokenizer, label2id, epochs=3, l
         acc = correct/total if total>0 else 0
         print(f"Epoch {epoch+1} - dev acc = {acc*100:.2f}%")
 
+    torch.save(model.state_dict(),"camembert_nli_finetuned.pt")
     return model
