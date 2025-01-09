@@ -1,4 +1,8 @@
 from fine_tuning.pos_trainer import train_pos
+import sentencepiece as spm
+
+tokenizer = spm.SentencePieceProcessor()
+tokenizer.load("data/processed/spm.model")
 
 label2id = {
     "ADJ": 0,
@@ -26,7 +30,7 @@ model = train_pos(
     pretrained_path="camembert_pretrained_4gb.pt",
     train_path="UD_French-GSD/fr_gsd-ud-train.conllu",
     dev_path="UD_French-GSD/fr_gsd-ud-dev.conllu",
-    tokenizer="data/processed/spm.model",
+    tokenizer=tokenizer,
     label2id=label2id,
     num_labels=num_labels,
     device="cpu"
