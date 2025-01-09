@@ -1,6 +1,8 @@
 import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
+from tqdm import tqdm
+
 from model.camembert_for_pretraining import CamembertForPreTraining
 from model.camembert_for_sequence_classification import CamembertForSequenceClassification
 
@@ -53,7 +55,7 @@ def train_nli(model_path, train_path, dev_path, tokenizer, label2id, epochs=3, l
         # train
         model.train()
         total_loss = 0
-        for input_ids, attention_mask, labels in train_loader:
+        for input_ids, attention_mask, labels in tqdm(train_loader,desc=f"Epoch {epoch}"):
             input_ids = input_ids.to(device)
             attention_mask = attention_mask.to(device)
             labels = labels.to(device)
