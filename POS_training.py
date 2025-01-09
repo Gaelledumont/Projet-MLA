@@ -1,8 +1,7 @@
 from fine_tuning.pos_trainer import train_pos
-import sentencepiece as spm
+from tokenization.sentencepiece_tokenizer import SentencePieceTokenizer
 
-tokenizer = spm.SentencePieceProcessor()
-tokenizer.load("data/processed/spm.model")
+tokenizer = SentencePieceTokenizer("data/processed/spm.model")
 
 label2id = {
     "ADJ": 0,
@@ -21,7 +20,8 @@ label2id = {
     "SCONJ": 13,
     "SYM": 14,
     "VERB": 15,
-    "X": 16
+    "X": 16,
+    "O": 17
 }
 
 num_labels = len(label2id)

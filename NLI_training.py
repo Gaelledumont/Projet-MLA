@@ -1,9 +1,8 @@
 from datasets import load_dataset
 from fine_tuning.nli_trainer import train_nli
-import sentencepiece as spm
+from tokenization.sentencepiece_tokenizer import SentencePieceTokenizer
 
-tokenizer = spm.SentencePieceProcessor()
-tokenizer.load("data/processed/spm.model")
+tokenizer = SentencePieceTokenizer("data/processed/spm.model")
 
 # xnli_train = load_dataset("xnli", "fr", split="train")
 # xnli_val = load_dataset("xnli", "fr", split="validation")
