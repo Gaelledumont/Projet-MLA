@@ -1,5 +1,5 @@
 import torch
-from torch.amp import autocast, GradScaler
+from torch.cuda.amp import autocast, GradScaler
 from torch.utils.data import DataLoader
 import torch.optim as optim
 from tqdm import tqdm
@@ -70,7 +70,7 @@ class Trainer:
 
         # Si on active la Mixed Precision
         if self.use_amp:
-            self.scaler = GradScaler('cuda')
+            self.scaler = GradScaler()
         else:
             self.scaler = None
 
@@ -119,7 +119,7 @@ class Trainer:
 
                 # Forward
                 if self.use_amp:
-                    with autocast(device_type="cuda"):
+                    with autocast():
                         _, loss = self.model(input_ids, attention_mask=attention_mask, labels=labels)
                 else:
                     _, loss = self.model(input_ids, attention_mask=attention_mask, labels=labels)
