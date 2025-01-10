@@ -19,14 +19,11 @@ def roberta_init_weights(module: nn.Module, initializer_range: float):
         nn.init.zeros_(module.bias)
         nn.init.ones_(module.weight)
 
-# https://www.youtube.com/watch?v=dichIcUZfOw (pourquoi on fait du positional encoding,
-#le reste de la vidéo est moins important parce que c'est pas le même encding qu'est utilisé)
-
 class CamembertEmbeddings(nn.Module):
     """
     Embedding
     args :
-    vocab_size (int) : taille du vocabulaire : tous les mots qu'on connait (10 000 actuellement si je dis pas de bêtises)
+    vocab_size (int) : taille du vocabulaire
     max_len (int) : longueur max de la séquence d'entrée (x)
     embedding_dim (int) : the size of each embedding vector
     """
@@ -38,7 +35,6 @@ class CamembertEmbeddings(nn.Module):
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, input_ids):
-        # input_ids: (batch_size, seq_len)
         seq_length = input_ids.size(1)
         position_ids = torch.arange(seq_length, dtype=torch.long, device=input_ids.device)
         position_ids = position_ids.unsqueeze(0).expand_as(input_ids)
@@ -51,21 +47,6 @@ class CamembertEmbeddings(nn.Module):
         embeddings = self.dropout(embeddings)
         return embeddings
 
-"""
-d'abord on a créé un tokenizer qui prend un corpus de mots et crée une sorte de dictionnaire où il associe chaque mot à une valeur, un id, 
-ensuite on va prendre notre phrase à encoder, la transofmer en token (donc valeur des mots correspondants dasn le 'dictionnaire') 
-on va créer des vecteurs d'embeddings à nos tokens qui représentent le 'sens' du mot, initialisés d'abord aléatoirement grâce à nn.Embedding, 
-qui passe par un apprentissage (donc notre modèle transformer) et grâce à la backpropagation, on va recalculer nos vecteurs d'embeddding de sorte 
-que des mtos tel que 'chat' et 'félin' auront des valeurs de vecteurs assez proches. 
-parallèlement on décide de créer des vecteurs d'embedding pour nos tokens qui ne donnent pas une info sur le 'sens' du mot mais cette fois ci 
-sur sa position dans la phrase car c'est important de garder le contexte pour faire de meilleures prédictions"""
-
-"""l'attention c'est ce qui dit au modèle 'concentre toi la dessu s'cest important' c'est calculé grâce à 3 matries : Queries, Keys et Values
-+ de détails slides 70-72 dans el cours d'Obin
-ou https://medium.com/@geetkal67/attention-networks-a-simple-way-to-understand-self-attention-f5fb363c736d
-"""
-
-#the number of attention heads must evenly divide the number of channels
 class CamembertSelfAttention(nn.Module):
     """
     Multi-Head Self-Attention module.
@@ -170,11 +151,6 @@ class CamembertEncoder(nn.Module):
             hidden_states = layer(hidden_states, attention_mask)
         return hidden_states
 
-"""
-In order to obtain a representation for a given token, we first
-compute the average of each sub-word's represen-
-tations in the last four layers of the Transformer,
-and then average the resulting sub-word vectors."""
 
 class CamembertModel(nn.Module):
     def __init__(self, config: CamembertConfig):
@@ -186,7 +162,6 @@ class CamembertModel(nn.Module):
         self.apply(lambda module: roberta_init_weights(module, config.initializer_range))
 
     def forward(self, input_ids, attention_mask=None):
-        # On vérifie et déplace les tenseurs si nécessaire
         device = next(self.parameters()).device
         input_ids = input_ids.to(device)
         if attention_mask is not None:

@@ -1,6 +1,8 @@
 import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
+from tqdm import tqdm
+
 from model.camembert_for_pretraining import CamembertForPreTraining
 from model.camembert_for_sequence_classification import CamembertForSequenceClassification
 
@@ -37,23 +39,23 @@ class NLIDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.samples)
 
-def train_nli(model_path, train_path, dev_path, tokenizer, label2id, device='cuda'):
+def train_nli(model_path, train_path, dev_path, tokenizer, label2id, epochs=3, lr=1e-5, batch_size=16, device='cuda'):
     pretrained = CamembertForPreTraining.load_pretrained(model_path, device=device)
     model = CamembertForSequenceClassification(pretrained, num_labels=len(label2id)).to(device)
 
     train_dataset = NLIDataset(train_path, tokenizer, label2id)
     dev_dataset   = NLIDataset(dev_path, tokenizer, label2id)
 
-    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-    dev_loader   = DataLoader(dev_dataset, batch_size=16, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    dev_loader   = DataLoader(dev_dataset, batch_size=batch_size, shuffle=False)
 
-    optimizer = optim.Adam(model.parameters(), lr=1e-5)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    for epoch in range(3):
+    for epoch in range(1,epochs+1):
         # train
         model.train()
         total_loss = 0
-        for input_ids, attention_mask, labels in train_loader:
+        for input_ids, attention_mask, labels in tqdm(train_loader,desc=f"Epoch {epoch}"):
             input_ids = input_ids.to(device)
             attention_mask = attention_mask.to(device)
             labels = labels.to(device)
@@ -80,4 +82,5 @@ def train_nli(model_path, train_path, dev_path, tokenizer, label2id, device='cud
         acc = correct/total if total>0 else 0
         print(f"Epoch {epoch+1} - dev acc = {acc*100:.2f}%")
 
+    torch.save(model.state_dict(),"camembert_nli_finetuned.pt")
     return model
