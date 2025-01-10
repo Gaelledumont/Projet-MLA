@@ -1,4 +1,3 @@
-from datasets import load_dataset
 from fine_tuning.nli_trainer import train_nli
 from tokenization.sentencepiece_tokenizer import SentencePieceTokenizer
 
@@ -18,5 +17,6 @@ model = train_nli(
     dev_path="xnli_french_val.tsv",
     tokenizer=tokenizer,
     label2id=label2id,
+    num_labels=len(label2id),
     device="cpu"
 )

@@ -10,6 +10,7 @@ class NLIDataset(torch.utils.data.Dataset):
     def __init__(self, data_path, tokenizer, label2id, max_len=512):
         self.samples = []
         with open(data_path, "r", encoding="utf-8") as f:
+            next(f)
             for line in f:
                 line = line.strip()
                 if not line:
