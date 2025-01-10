@@ -7,7 +7,7 @@ import math
 from .schedulers import PolynomialDecayLR
 
 class Trainer:
-    def __init__(self, model, dataset, batch_size=32, lr=7e-4, total_steps=100000, warmup_steps=10000, end_learning_rate=0.0, power=1.0, accumulation_steps=256, device='cuda', checkpoint_steps=10000, dev_dataset=None, eval_steps=2000, use_amp=False, optimizer=None, scheduler=None):
+    def __init__(self, model, dataset, batch_size=32, lr=7e-4, total_steps=100000, warmup_steps=10000, end_learning_rate=0.0, power=1.0, accumulation_steps=256, device='cuda', checkpoint_steps=10000, dev_dataset=None, eval_steps=2000, use_amp=False):
         """
         - total_steps: nombre total de pas d'entraînement
         - warmup_steps: nombre de pas de warmup
@@ -17,8 +17,6 @@ class Trainer:
         - checkpoint_steps : sauvegarde un checkpoint tous les X steps
         - dev_dataset : un dataset "val" pour calculer une perplexité de validation
         - eval_steps : on fait evaluate_dev() tous les X steps
-        - optimizer : Instance d'optimiseur pré-existante (pour une reprise)
-        - scheduler : Instance de scheduler pré-existante (pour une reprise)
         """
         self.model = model
         self.dataset = dataset
@@ -50,28 +48,20 @@ class Trainer:
         self.dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
 
         # Optimizer (Adam avec betas=(0.9, 0.98))
-        if optimizer is not None:
-            self.optimizer = optimizer
-            print("Using provided optimizer.")
-        else:
-            self.optimizer = optim.Adam(
+        self.optimizer = optim.Adam(
             self.model.parameters(),
             lr=lr,
             betas=(0.9, 0.98)
         )
 
         # Scheduler polynomial
-        if scheduler is not None:
-            self.scheduler = scheduler
-            print("Using provided scheduler.")
-        else:
-            self.scheduler = PolynomialDecayLR(
-                optimizer=self.optimizer,
-                warmup_steps=self.warmup_steps,
-                total_steps=self.total_steps,
-                end_learning_rate=self.end_learning_rate,
-                power=self.power,
-            )
+        self.scheduler = PolynomialDecayLR(
+            optimizer=self.optimizer,
+            warmup_steps=self.warmup_steps,
+            total_steps=self.total_steps,
+            end_learning_rate=self.end_learning_rate,
+            power=self.power,
+        )
 
         # On expose l'optimiseur et le scheduler
         self.optimizer = self.optimizer
@@ -96,11 +86,6 @@ class Trainer:
         self.device = torch.device(device)
         print(f"Using device: {self.device}")
 
-    @staticmethod
-    def create_scheduler(optimizer, warmup_steps, total_steps, end_learning_rate=0.0, power=1.0):
-        """Méthode statique pour créer le scheduler."""
-        return PolynomialDecayLR(optimizer, warmup_steps, total_steps, end_learning_rate, power)
-
     def log_gpu_memory(self):
         if torch.cuda.is_available():
             print(f"GPU memory: {torch.cuda.memory_allocated() / 1024 ** 2:.2f}MB allocated, "
@@ -119,7 +104,7 @@ class Trainer:
         self.model.train()
         step_count = start_step
         loss_accum = initial_loss_accum
-        current_epoch = math.ceil(start_step / self.steps_per_epoch) + 1 # Calcul de l'epoch de départ
+        current_epoch = 1 # Ajout d'un compteur d'epoch
 
         # Boucle par epoch
         while current_epoch <= self.total_epochs:
