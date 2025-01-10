@@ -7,27 +7,39 @@ from model.camembert_for_pretraining import CamembertForPreTraining
 from model.camembert_for_sequence_classification import CamembertForSequenceClassification
 
 class NLIDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path, tokenizer, label2id, max_len=128):
+    def __init__(self, data_path, tokenizer, label2id, max_len=512):
         self.samples = []
         with open(data_path, "r", encoding="utf-8") as f:
-            next(f)
             for line in f:
-                premise, hypo, lab = line.strip().split('\t')
+                line = line.strip()
+                if not line:
+                    continue
+                splits = line.split("\t")
+                if len(splits) != 3:
+                    # on ignore
+                    continue
+                premise, hypo, lab = splits
+                if lab not in label2id:
+                    raise ValueError(f"Label NLI inconnu : {lab}")
                 self.samples.append((premise, hypo, lab))
         self.tokenizer = tokenizer
         self.label2id = label2id
         self.max_len = max_len
 
+    def __len__(self):
+        return len(self.samples)
+
     def __getitem__(self, idx):
         premise, hypo, lab = self.samples[idx]
         premise_ids = self.tokenizer.encode(premise)
         hypo_ids = self.tokenizer.encode(hypo)
-        input_ids = premise_ids + [2] + hypo_ids
+        input_ids = [2] + premise_ids + [2, 2] + hypo_ids + [2]
         # on tronque/pad
-        input_ids = input_ids[:self.max_len]
+        if len(input_ids)>self.max_len:
+            input_ids = input_ids[:self.max_len]
         attention_mask = [1]*len(input_ids)
         while len(input_ids)<self.max_len:
-            input_ids.append(1)  # pad_id
+            input_ids.append(self.tokenizer.pad_token_id())  # pad_id
             attention_mask.append(0)
         label_id = self.label2id[lab]
 
@@ -37,21 +49,18 @@ class NLIDataset(torch.utils.data.Dataset):
             torch.tensor(label_id, dtype=torch.long)
         )
 
-    def __len__(self):
-        return len(self.samples)
-
-def train_nli(model_path, train_path, dev_path, tokenizer, label2id, epochs=3, lr=1e-5, batch_size=16, device='cuda'):
+def train_nli(model_path, train_path, dev_path, tokenizer, label2id, num_labels, epochs=3, lr=1e-5, batch_size=16, device='cuda'):
     pretrained = CamembertForPreTraining.load_pretrained(model_path, device=device)
-    model = CamembertForSequenceClassification(pretrained, num_labels=len(label2id)).to(device)
+    model = CamembertForSequenceClassification(pretrained, num_labels=num_labels).to(device)
 
-    train_dataset = NLIDataset(train_path, tokenizer, label2id)
-    dev_dataset   = NLIDataset(dev_path, tokenizer, label2id)
-
+    train_dataset = NLIDataset(train_path, tokenizer, label2id, max_len=512)
+    dev_dataset   = NLIDataset(dev_path, tokenizer, label2id, max_len=512)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     dev_loader   = DataLoader(dev_dataset, batch_size=batch_size, shuffle=False)
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
+    best_acc=0.0
     for epoch in range(1,epochs+1):
         # train
         model.train()
@@ -66,9 +75,10 @@ def train_nli(model_path, train_path, dev_path, tokenizer, label2id, epochs=3, l
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
-        print(f"Epoch {epoch+1} - train loss = {total_loss/len(train_loader):.4f}")
+        avg_loss = total_loss/len(train_loader)
+        print(f"[Epoch {epoch}] train loss = {avg_loss:.4f}")
 
-        # dev
+        # eval sur dev
         model.eval()
         correct, total = 0, 0
         with torch.no_grad():
@@ -81,7 +91,10 @@ def train_nli(model_path, train_path, dev_path, tokenizer, label2id, epochs=3, l
                 correct += (preds==labels).sum().item()
                 total += labels.size(0)
         acc = correct/total if total>0 else 0
-        print(f"Epoch {epoch+1} - dev acc = {acc*100:.2f}%")
+        print(f"[Epoch {epoch}] dev acc = {acc*100:.2f}%")
+        if acc>best_acc:
+            best_acc=acc
+            torch.save(model.state_dict(),"camembert_nli_best.pt")
+            print(f"New best model saved (acc=(acc*100:.2f)%)")
 
-    torch.save(model.state_dict(),"camembert_nli_finetuned.pt")
     return model
