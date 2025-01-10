@@ -8,38 +8,38 @@ from model.camembert_for_parsing import CamembertForParsing
 
 class ParsingDataset(Dataset):
     def __init__(self, conllu_path, tokenizer, rel2id, max_len=512):
+        # On parse et on stocke
         self.samples = []
         with open(conllu_path, "r", encoding="utf-8") as f:
             tokens = []
             heads = []
             rels = []
             for line in f:
-                line = line.strip()
-                if not line or line.startswith("#"):
+                line=line.strip()
+                if not line:
                     if tokens:
                         self.samples.append((tokens, heads, rels))
-                        tokens, heads, rels = [], [], []
+                        tokens, heads, rels=[],[],[]
                     continue
-                splits = line.split("\t")
-                if len(splits) < 4:
-                    raise ValueError(f"Malformed line in file: {line}")
-                try:
-                    t = splits[1]
-                    h = int(splits[2])
-                    r = splits[3]
-                except ValueError as e:
-                    raise ValueError(f"Error parsing line: {line}\n{e}")
+                splits=line.split("\t")
+                # splits[0] => index
+                # splits[1] => token
+                # splits[2] => head
+                # splits[3] => rel
+                # on simplifie
+                t = splits[1]
+                h = int(splits[2])
+                r = splits[3]
                 tokens.append(t)
                 heads.append(h)
                 if r not in rel2id:
-                    raise ValueError(f"Unknown relation '{r}'")
+                    raise ValueError(f"Relation '{r}' inconnue")
                 rels.append(r)
             if tokens:
                 self.samples.append((tokens, heads, rels))
-        self.tokenizer = tokenizer
-        self.rel2id = rel2id
-        self.max_len = max_len
-
+        self.tokenizer=tokenizer
+        self.rel2id=rel2id
+        self.max_len=max_len
 
     def __len__(self):
         return len(self.samples)
