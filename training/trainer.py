@@ -34,9 +34,8 @@ class Trainer:
         self.use_amp = use_amp
 
         # On calcule steps_per_epoch
-        # len(dataset) = total nb d'échantillons
         effective_batch_size = batch_size * accumulation_steps
-        dataset_size = len(self.dataset)
+        dataset_size = len(self.dataset) # nombre total d'échantillons
         self.steps_per_epoch = math.ceil(dataset_size / effective_batch_size)
 
         # On en déduit un max d'epochs pour atteindre total_steps
