@@ -11,7 +11,7 @@ def chunk_and_tokenize(corpus_path, spm_model, shard_size=100000, output_dir="da
     :param shard_size nombre de lignes tokenisées par shard
     :param output_dir: répertoire où stocker les shards
     :param dev_ratio: proportion de lignes envoyées dans le dev set
-    : param shuffle: si True, mélange toutes les lignes avant de scinder train/dev
+    :param shuffle: si True, mélange toutes les lignes avant de scinder train/dev
     """
     # 1) Création des dossiers
     train_shards_dir = os.path.join(output_dir, "tokenized_shards_train")
