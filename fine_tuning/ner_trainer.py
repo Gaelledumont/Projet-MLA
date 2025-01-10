@@ -61,7 +61,7 @@ def compute_f1_bio(pred_labels, gold_labels):
 
 # 2) Dataset pour la NER
 class NERDataset(Dataset):
-    def __init__(self, conll_path, tokenizer, label2id, max_len=128):
+    def __init__(self, conll_path, tokenizer, label2id, max_len=512):
         self.samples = []
         with open(conll_path, 'r', encoding='utf-8') as f:
             tokens, labels = [], []
@@ -76,6 +76,9 @@ class NERDataset(Dataset):
                 if len(parts) >= 2:
                     tok = parts[0]
                     lab = parts[1]
+                    # s'il n'existe pas, on lève une exception
+                    if lab not in label2id:
+                        raise ValueError(f"Label NER inconnu : {lab}")
                     tokens.append(tok)
                     labels.append(lab)
             # fin du fichier
@@ -98,13 +101,13 @@ class NERDataset(Dataset):
 
         for t, lab in zip(tokens, labels):
             sub_ids = self.tokenizer.encode(t)
-            if not sub_ids:
+            if len(sub_ids)==0:
                 continue
             # label
-            lab_id = self.label2id.get(lab, self.label2id["O"]) # plan B
+            lab_id = self.label2id[lab]
             # le premier sub-token reçoit le label, le reste -100
             input_ids += sub_ids
-            label_ids += [lab_id] + [-100]*(len(sub_ids)-1)
+            label_ids += [lab_id] + ([-100]*(len(sub_ids)-1))
 
         # On tronque
         input_ids = input_ids[:self.max_len]
@@ -159,22 +162,14 @@ def evaluate_ner(model, dev_loader, id2label, device='cuda'):
                 pred_labels_str = [id2label[px] for px in filtered_pred]
 
                 # on extrait les entités
-                pred_ents = extract_entities_bio(pred_labels_str)
-                gold_ents = extract_entities_bio(gold_labels_str)
-
-                # on calcule p/r/f1 et on accumule
-                pred_set = set(pred_ents)
-                gold_set = set(gold_ents)
-                tp = len(pred_set & gold_set)
-                fp = len(gold_set - pred_set)
-                fn = len(gold_set - pred_set)
+                tp, fp, fn, _, _, _ = compute_f1_bio(pred_labels_str, gold_labels_str)
                 tp_all += tp
                 fp_all += fp
                 fn_all += fn
 
     prec = tp_all/(tp_all+fp_all) if (tp_all+fp_all)>0 else 0.0
-    rec  = tp_all/(tp_all+fn_all) if (tp_all+fn_all)>0 else 0.0
-    f1   = 2*prec*rec/(prec+rec) if (prec+rec)>0 else 0.0
+    rec = tp_all/(tp_all+fn_all) if (tp_all+fn_all)>0 else 0.0
+    f1 = 2*prec*rec/(prec+rec) if (prec+rec)>0 else 0.0
     model.train()
     return prec, rec, f1
 
@@ -209,8 +204,8 @@ def train_ner(
     model = CamembertForNER(pretrained, num_labels=num_labels).to(device)
 
     # On charge les datasets
-    train_data = NERDataset(train_path, tokenizer, label2id)
-    dev_data   = NERDataset(dev_path, tokenizer, label2id)
+    train_data = NERDataset(train_path, tokenizer, label2id, max_len=512)
+    dev_data   = NERDataset(dev_path, tokenizer, label2id, max_len=512)
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     dev_loader   = DataLoader(dev_data, batch_size=batch_size, shuffle=False)
 
@@ -237,7 +232,7 @@ def train_ner(
 
         # Évaluation F1 sur dev
         prec, rec, f1 = evaluate_ner(model, dev_loader, id2label, device)
-        print(f"[Epoch {epoch}] dev prec={prec*100:.2f}, rec={rec*100:.2f}, f1={f1*100:.2f}")
+        print(f"[Epoch {epoch}] dev F1={f1*100:.2f}, P={prec*100:.2f}, R={rec*100:.2f}")
 
         # On sauvegarde
         if f1>best_f1:
