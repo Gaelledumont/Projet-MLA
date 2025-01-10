@@ -10,6 +10,7 @@ class NLIDataset(torch.utils.data.Dataset):
     def __init__(self, data_path, tokenizer, label2id, max_len=128):
         self.samples = []
         with open(data_path, "r", encoding="utf-8") as f:
+            next(f)
             for line in f:
                 premise, hypo, lab = line.strip().split('\t')
                 self.samples.append((premise, hypo, lab))
