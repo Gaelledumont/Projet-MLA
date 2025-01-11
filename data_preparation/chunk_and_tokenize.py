@@ -1,18 +1,3 @@
-"""
-Vue d'ensemble : Ce script est conçu pour préparer un corpus brut afin d'entraîner ou de fine-tuner un modèle de langage 
-comme CamemBERT. Il effectue plusieurs opérations essentielles :
-
-1. Lecture d'un fichier texte brut ligne par ligne.
-2. Mélange des lignes pour éviter les biais d'ordre dans le corpus.
-3. Séparation des données en ensembles d'entraînement (train) et de validation (dev).
-4. Tokenisation des lignes en sous-tokens à l'aide de SentencePiece.
-5. Découpage des sous-tokens en séquences de longueur fixe (par défaut 512).
-6. Sauvegarde des séquences tokenisées en blocs (shards) pour une gestion efficace des données 
-   pendant l'entraînement.
-
-Ce script est particulièrement utile pour traiter de grands corpus et les préparer pour des modèles BERT-like.
-"""
-
 import os
 import random
 import sentencepiece as spm
@@ -67,6 +52,7 @@ def chunk_and_tokenize(corpus_path, spm_model, shard_size=100000, output_dir="da
         """
         shard_id = 0
         samples = []
+
         for txt in lines_list:
             tokens = sp.encode_as_ids(txt)
             # on découpe
@@ -76,27 +62,34 @@ def chunk_and_tokenize(corpus_path, spm_model, shard_size=100000, output_dir="da
                 segment = tokens[start:end]
                 samples.append(segment)
                 start = end
+
                 if len(samples) >= shard_size:
                     shard_path = os.path.join(shard_output_dir, f"shard_{shard_id}.pt")
                     torch.save(samples, shard_path)
                     samples = []
                     shard_id += 1
+
         # Save remainder
         if samples:
             shard_path = os.path.join(shard_output_dir, f"shard_{shard_id}.pt")
             torch.save(samples, shard_path)
+
         print(f"[INFO] Created {shard_id+1} shards in '{shard_output_dir}'."
               f"(max_seq_len={max_seq_len}; shard_size={shard_size})")
+
     # 6) On tokenize et on stocke en shards - TRAIN
     process_lines_to_shards(train_lines, train_shards_dir)
+
     # 7) On tokenize et stocke en shards - DEV
     if dev_count > 0:
         process_lines_to_shards(dev_lines, dev_shards_dir)
     else:
         print(f"[DEV] No dev set created (dev_ratio=0 or no lines).")
+
 if __name__ == "__main__":
     corpus_path = "data/raw/oscar_fr_4GB_fixed.txt"
     spm_model_path = "data/processed/spm.model"
+
     chunk_and_tokenize(
         corpus_path=corpus_path,
         spm_model=spm_model_path,
