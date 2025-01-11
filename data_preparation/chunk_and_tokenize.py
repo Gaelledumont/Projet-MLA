@@ -1,18 +1,3 @@
-"""
-Vue d'ensemble : Ce script est conçu pour préparer un corpus brut afin d'entraîner ou de fine-tuner un modèle de langage 
-comme CamemBERT. Il effectue plusieurs opérations essentielles :
-
-1. Lecture d'un fichier texte brut ligne par ligne.
-2. Mélange des lignes pour éviter les biais d'ordre dans le corpus.
-3. Séparation des données en ensembles d'entraînement (train) et de validation (dev).
-4. Tokenisation des lignes en sous-tokens à l'aide de SentencePiece.
-5. Découpage des sous-tokens en séquences de longueur fixe (par défaut 512).
-6. Sauvegarde des séquences tokenisées en blocs (shards) pour une gestion efficace des données 
-   pendant l'entraînement.
-
-Ce script est particulièrement utile pour traiter de grands corpus et les préparer pour des modèles BERT-like.
-"""
-
 import os
 import random
 import sentencepiece as spm
