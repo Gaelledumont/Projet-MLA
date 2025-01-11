@@ -21,19 +21,15 @@ class ParsingDataset(Dataset):
                         self.samples.append((tokens, heads, rels))
                         tokens, heads, rels=[],[],[]
                     continue
-                splits = line.split("\t")
-                if len(splits) < 4:
-                    continue
-                if splits[6] == '_':
-                    continue
+                splits=line.split("\t")
                 # splits[0] => index
                 # splits[1] => token
                 # splits[2] => head
                 # splits[3] => rel
                 # on simplifie
                 t = splits[1]
-                h = int(splits[6])
-                r = splits[7]
+                h = int(splits[2])
+                r = splits[3]
                 tokens.append(t)
                 heads.append(h)
                 if r not in rel2id:
