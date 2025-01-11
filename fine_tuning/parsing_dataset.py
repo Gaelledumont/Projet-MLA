@@ -85,7 +85,7 @@ class ParsingDataset(Dataset):
             input_ids.extend(subw)
             # on note la HEAD
             new_heads.append(hd)
-            new_rels.append(self.rel2id.get[rl])
+            new_rels.append(self.rel2id[rl])
 
         # On tronque
         input_ids = input_ids[:self.max_len]
