@@ -96,7 +96,7 @@ class CamembertForParsing(nn.Module):
         """
         bsz, seq_len, _ = arc_logits.size()
         # On va rassembler en 2D
-        arc_logits_2d = arc_logits.reshape(bsz*seq_len, seq_len)
+        arc_logits_2d = arc_logits.view(bsz*seq_len, seq_len)
         gold_heads = heads.view(-1)
 
         # on veut ignorer le padding => mask
