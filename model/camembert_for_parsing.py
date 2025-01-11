@@ -1,7 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from .camembert_for_pretraining import CamembertForPreTraining
 
 # Biaffine Layers
 class Biaffine(nn.Module):
