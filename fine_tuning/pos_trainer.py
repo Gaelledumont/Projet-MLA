@@ -26,9 +26,11 @@ class POSDataset(Dataset):
                     lab = splits[3]  # UPOS
                     tokens.append(t)
                     # si lab n'existe pas dans label2id, on lève une exception
+                    if lab == '_':
+                        continue
                     if lab not in label2id:
                         raise ValueError(f"Label '{lab}' inconnu dans label2id !")
-                labels.append(lab)
+                    labels.append(lab)
             if tokens:
                 self.samples.append((tokens, labels))
 

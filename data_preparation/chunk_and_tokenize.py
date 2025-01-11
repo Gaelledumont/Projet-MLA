@@ -13,7 +13,7 @@ def chunk_and_tokenize(corpus_path, spm_model, shard_size=100000, output_dir="da
     :param output_dir: Répertoire où stocker les shards
     :param dev_ratio: Proportion de lignes allouées au dev set
     :param shuffle: si True, mélange toutes les lignes avant de scinder train/dev
-    :param max_seq_len: Longueur maximame (en sous-tokens) par séquence
+    :param max_seq_len: Longueur maximale (en sous-tokens) par séquence
     """
     # 1) Création des dossiers
     train_shards_dir = os.path.join(output_dir, "tokenized_shards_train")

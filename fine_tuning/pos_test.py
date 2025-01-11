@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from model.camembert_for_pretraining import CamembertForPreTraining
 from model.camembert_for_token_classification import CamembertForTokenClassification
@@ -37,7 +38,7 @@ def test_pos(
     model.eval()
     correct, total = 0, 0
     with torch.no_grad():
-        for inputs_ids, attention_mask, labels in test_loader:
+        for inputs_ids, attention_mask, labels in tqdm(test_loader):
             inputs_ids = inputs_ids.to(device)
             attention_mask = attention_mask.to(device)
             labels = labels.to(device)
