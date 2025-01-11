@@ -1,3 +1,24 @@
+"""
+Description :
+Ce script implémente une version personnalisée du modèle Camembert (adaptation de RoBERTa pour le français) 
+en utilisant PyTorch. Le modèle est basé sur l'architecture Transformer et est conçu pour encoder des séquences 
+textuelles en représentations vectorielles riches.
+
+Composantes principales :
+- Initialisation des poids (fonction `roberta_init_weights`) adaptée aux différents modules.
+- Génération des embeddings combinant word embeddings, position embeddings et normalisation.
+- Implémentation du mécanisme de Self-Attention multi-têtes.
+- Construction de couches Transformer avec attention, transformations intermédiaires et connexions résiduelles.
+- Empilement de 12 couches Transformer pour encoder les séquences.
+- Gestion des masques d'attention pour ignorer les tokens de padding.
+
+Utilisation :
+Le modèle Camembert ainsi défini peut être utilisé pour diverses tâches NLP telles que :
+- Classification de texte
+- Analyse syntaxique et sémantique
+- Réponse aux questions
+- Extraction d'entités nommées, etc.
+"""
 import math
 import torch
 import torch.nn as nn
