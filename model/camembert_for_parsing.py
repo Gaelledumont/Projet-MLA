@@ -1,3 +1,20 @@
+"""
+Ce script implémente un analyseur syntaxique basé sur la dépendance (dependency parser) 
+en utilisant des modèles de type CamemBERT combinés avec des couches biaffines.
+
+### Fonctionnalités principales :
+1. **Couches biaffines** : Calculent les scores d'attachement des arcs syntaxiques (arc) 
+   et des relations syntaxiques (relation) entre les mots dans une phrase.
+2. **Couches MLP** : Réduisent les dimensions des représentations encodées et 
+   servent de prétraitement pour les couches biaffines.
+3. **Analyseur de dépendances** : Combine les MLP et les couches biaffines pour prédire 
+   les arcs syntaxiques (qui est le parent de chaque mot) et leurs relations grammaticales.
+4. **CamemBERT comme encodeur** : Utilise un modèle pré-entraîné CamemBERT pour obtenir 
+   des représentations contextualisées des mots dans une phrase.
+5. **Perte pour l'entraînement** : Calcule une perte combinée pour l'attachement des arcs 
+   et la prédiction des relations syntaxiques, permettant un entraînement supervisé.
+"""
+
 import torch
 import torch.nn as nn
 
