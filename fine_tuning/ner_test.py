@@ -1,5 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
+from tqdm import tqdm
+
 
 from model.camembert_for_pretraining import CamembertForPreTraining
 from model.camembert_for_ner import CamembertForNER
@@ -22,7 +24,7 @@ def evaluate_ner_f1(model, test_loader, id2label, device='cuda'):
     tp_all, fp_all, fn_all = 0,0,0
 
     with torch.no_grad():
-        for input_ids, attention_mask, labels in test_loader:
+        for input_ids, attention_mask, labels in tqdm(test_loader):
             input_ids = input_ids.to(device)
             attention_mask = attention_mask.to(device)
             labels = labels.to(device)
