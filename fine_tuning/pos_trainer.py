@@ -140,7 +140,7 @@ def train_pos(
         if acc>best_acc:
             best_acc=acc
             best_model_state=model.state_dict()
-            print(f"New best dev acc={acc*100:.2f}%) (epoch={e})")
+            print(f"New best dev acc={acc*100:.2f}% (epoch={e})")
 
     # restore best at end
     if best_model_state is not None:
