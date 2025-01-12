@@ -26,8 +26,7 @@ This project aims to replicate the experimental results of the paper *CamemBERT:
 ### **Required Libraries**
 
 ```bash
-pip install torch torchvision transformers
-pip install sentencepiece
+pip install -r requirements.txt
 ```
 
 ---
