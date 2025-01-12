@@ -10,6 +10,8 @@ class NLIDataset(torch.utils.data.Dataset):
     def __init__(self, tsv_path, tokenizer, label2id, max_len=512):
         self.samples = []
         with open(tsv_path, "r", encoding="utf-8") as f:
+            # Skip header line
+            next(f) # on saute l'en-tête
             for line in f:
                 line = line.strip()
                 if not line:
