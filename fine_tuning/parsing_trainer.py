@@ -10,7 +10,7 @@ from .parsing_dataset import ParsingDataset
 @torch.no_grad()
 def evaluate_parsing(model, loader, device='cuda'):
     """
-    Calcul du UAS/LAS
+    Calcul du UAS/LAS sur le loader (dev)
     """
     model.eval()
     total_tokens=0
@@ -22,6 +22,7 @@ def evaluate_parsing(model, loader, device='cuda'):
         attention_mask=attention_mask.to(device)
         heads=heads.to(device)
         rels=rels.to(device)
+
         arc_logits, rel_logits, _ = model(input_ids, attention_mask=attention_mask)
         # => pred_head = argmax sur dimension=2
         pred_heads = torch.argmax(arc_logits, dim=2)
@@ -73,9 +74,14 @@ def train_parsing(
     lr=1e-4,
     epochs=10,
     batch_size=16,
-    device='cuda'
+    device='cuda',
+    out_model_path=None
 ):
-    # On charge Camembert pré-entraîné
+    """
+    Entraîne CamembertForParsing sur un dataset de dépendances.
+    Retourne la meilleure LAS atteinte sur le dev set.
+    """
+    # 1) On charge Camembert pré-entraîné
     pretrained = CamembertForPreTraining.load_pretrained(pretrained_path, device=device)
     model = CamembertForParsing(
         camembert_pretrained=pretrained,
@@ -87,16 +93,18 @@ def train_parsing(
         dropout=dropout
     ).to(device)
 
-    # On charge les datasets
+    # 2) On charge les datasets
     train_data=ParsingDataset(train_path, tokenizer, rel2id, max_len=512)
     dev_data=ParsingDataset(dev_path, tokenizer, rel2id, max_len=512)
     train_loader=DataLoader(train_data, batch_size=batch_size, shuffle=True)
     dev_loader=DataLoader(dev_data, batch_size=batch_size, shuffle=False)
 
-    # Optim
+    # 3) Optim
     optimizer=optim.Adam(model.parameters(),lr=lr)
 
     best_las=0.0
+    best_model_state=None
+
     for e in range(1, epochs+1):
         model.train()
         total_loss=0.0
@@ -107,7 +115,7 @@ def train_parsing(
             rels=rels.to(device)
 
             optimizer.zero_grad()
-            arc_logits, rel_logits, loss=model(input_ids, attention_mask, heads, rels)
+            arc_logits, rel_logits, loss = model(input_ids, attention_mask, heads, rels)
             loss.backward()
             optimizer.step()
             total_loss+=loss.item()
@@ -122,7 +130,15 @@ def train_parsing(
         # On sauvegarde si c'est meilleur
         if las>best_las:
             best_las=las
-            torch.save(model.state_dict(),"camembert_parsing_best.pt")
-            print(f"New best model saved (LAS={las*100:.2f}%)")
+            best_model_state=model.state_dict()
+            print(f"New best dev LAS={las*100:.2f}%")
+
+    # On recharge le best
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
+
+    if out_model_path and best_model_state is not None:
+        torch.save(model.state_dict(), out_model_path)
+        print(f"Best model saved => {out_model_path} (LAS={best_las*100:.2f}%)")
 
     return best_las

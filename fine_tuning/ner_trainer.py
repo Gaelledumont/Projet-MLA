@@ -185,7 +185,8 @@ def train_ner(
     lr=3e-5,
     epochs=3,
     batch_size=16,
-    device='cuda'
+    device='cuda',
+    out_model_path=None,
 ):
     """
     Fine-tuning NER sur un jeu de données.
@@ -212,6 +213,8 @@ def train_ner(
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     best_f1 = 0.0
+    best_model_state=None
+
     for epoch in range(1, epochs+1):
         # On entraîne
         model.train()
@@ -237,9 +240,16 @@ def train_ner(
         # On sauvegarde
         if f1>best_f1:
             best_f1=f1
-            torch.save(model.state_dict(), "camembert_ner_best.pt")
-            print(f"New best model saved (f1={f1*100:.2f})")
+            # on stocke le modèle en RAM
+            best_model_state=model.state_dict()
+            print(f"New best model saved (f1={f1*100:.2f}) at epoch={epoch}")
 
-    # On peut recharger le best si on veut
-    # model.load_state_dict(torch.load("camembert_ner_best.pt"))
+    # A la fin on recharge le meilleur état
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
+
+    if out_model_path and best_model_state is not None:
+        torch.save(model.state_dict(), out_model_path)
+        print(f"Best model saved => {out_model_path} (F1={best_f1*100:.2f})")
+
     return best_f1
