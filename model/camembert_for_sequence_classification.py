@@ -1,5 +1,4 @@
 import torch.nn as nn
-from .camembert_for_pretraining import CamembertForPreTraining
 
 class CamembertForSequenceClassification(nn.Module):
     def __init__(self, camembert_pretrained, num_labels=3):
