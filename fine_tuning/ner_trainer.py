@@ -64,6 +64,7 @@ class NERDataset(Dataset):
     def __init__(self, conll_path, tokenizer, label2id, max_len=512):
         self.samples = []
         with open(conll_path, 'r', encoding='utf-8') as f:
+            next(f)
             tokens, labels = [], []
             for line in f:
                 line = line.strip()
@@ -72,10 +73,9 @@ class NERDataset(Dataset):
                         self.samples.append((tokens, labels))
                         tokens, labels = [], []
                     continue
-                parts = line.split()
-                if len(parts) >= 2:
-                    tok = parts[0]
-                    lab = parts[1]
+                splits = line.split("\t")
+                if len(splits) >= 2:
+                    tok, lab, _, _ = splits
                     # s'il n'existe pas, on lève une exception
                     if lab not in label2id:
                         raise ValueError(f"Label NER inconnu : {lab}")
