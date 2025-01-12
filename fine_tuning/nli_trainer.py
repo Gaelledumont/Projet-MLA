@@ -62,7 +62,7 @@ def train_nli(model_path, train_path, dev_path, tokenizer, label2id, num_labels,
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     best_acc=0.0
-    for epoch in range(1,epochs+1):
+    for epoch in range(1, epochs+1):
         # train
         model.train()
         total_loss = 0
@@ -98,4 +98,4 @@ def train_nli(model_path, train_path, dev_path, tokenizer, label2id, num_labels,
             torch.save(model.state_dict(),"camembert_nli_best.pt")
             print(f"New best model saved (acc=(acc*100:.2f)%)")
 
-    return model
+    return best_acc
