@@ -58,7 +58,3 @@ pip install -r requirements.txt
 - Compare performance with existing CamemBERT
 - Analyze the impact of corpus size and origin on results.
 ---
-## Additional Notes
-
-1. **Embeddings**: Word embeddings are randomly initialized and fine-tuned during training to capture word meaning and context.
-2. **Attention**: The attention mechanism helps the model focus on important parts of the sequence.
