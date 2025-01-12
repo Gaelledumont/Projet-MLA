@@ -15,6 +15,7 @@ class CamembertForNER(nn.Module):
         self.classifier = nn.Linear(hidden_size, num_labels)
 
     def forward(self, input_ids, attention_mask=None, labels=None):
+        # On obtient la représentation
         sequence_output = self.camembert(input_ids, attention_mask=attention_mask)
         sequence_output = self.dropout(sequence_output)
         logits = self.classifier(sequence_output)
