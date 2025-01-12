@@ -16,8 +16,11 @@ def grid_search_parsing(
 
     best_las=-1.0
     best_config=None
+    best_ckpt=None
+
     for lr in lrs:
         for bs in batch_sizes:
+            ckpt_name=f"parsing_lr{lr}_bs{bs}"
             print(f"\n=== GRID Parsing: lr={lr}, bs={bs}, epochs=30 ===")
             las= train_parsing(
                 pretrained_path=pretrained_path,
@@ -29,14 +32,16 @@ def grid_search_parsing(
                 lr=lr,
                 epochs=30,
                 batch_size=bs,
-                device=device
+                device=device,
+                out_model_path=ckpt_name
             )
             if las>best_las:
                 best_las=las
                 best_config=(lr, bs)
+                best_ckpt = ckpt_name
 
-    print("\n==========================")
-    print(f"BEST LAS on dev= {best_las*100:.2f}% with config (lr={best_config[0]}, bs={best_config[1]})")
+    # On loggue comme TensorBoard ne marche pas
+    print(f"BEST LAS on dev= {best_las*100:.2f}% with (lr={best_config[0]}, bs={best_config[1]}) => {best_ckpt}")
 
 if __name__=="__main__":
     tokenizer=SentencePieceTokenizer("data/processed/spm.model")
