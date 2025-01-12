@@ -10,14 +10,19 @@ def grid_search_nli(
     num_labels,
     device="cuda"
 ):
+    # hyperparamètres
     lrs=[1e-5, 2e-5, 3e-5]
     batch_sizes=[16,32]
 
     best_acc=-1.0
     best_config=None
+    best_ckpt=None
+
     for lr in lrs:
         for bs in batch_sizes:
+            ckpt_name=f"nli_lr{lr}_bs{bs}.pt"
             print(f"\n=== GRID NLI: lr={lr}, bs={bs}, epochs=10 ===")
+
             dev_acc= train_nli(
                 model_path=model_path,
                 train_path=train_path,
@@ -28,14 +33,19 @@ def grid_search_nli(
                 epochs=10,
                 lr=lr,
                 batch_size=bs,
-                device=device
+                device=device,
+                out_model_path=ckpt_name
             )
+            print(f"[GRID] dev_acc={dev_acc*100:.2f}% => (lr={lr}, bs={bs})")
+
             if dev_acc>best_acc:
                 best_acc=dev_acc
                 best_config=(lr, bs)
+                best_ckpt = ckpt_name
 
     print("\n=====================")
     print(f"BEST ACC on dev= {best_acc*100:.2f}% with config (lr={best_config[0]}, bs={best_config[1]})")
+    print(f"Checkpoint: {best_ckpt}")
 
 if __name__=="__main__":
     tokenizer=SentencePieceTokenizer("data/processed/spm.model")
