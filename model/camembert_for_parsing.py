@@ -113,11 +113,12 @@ class CamembertForParsing(nn.Module):
         # On va rassembler en 2D
         arc_logits_2d = arc_logits.reshape(bsz*seq_len, seq_len)
         gold_heads = heads.view(-1)
+        valid_mask = (gold_heads >= 0) & (gold_heads < seq_len)
 
         # on veut ignorer le padding => mask
         # On ignore le token [0]
         # En gros, on ignore tout token qui a attention_mask=0
-        active = attention_mask.view(-1).bool()
+        active = (attention_mask.view(-1) == 1) & valid_mask
         # On garde seulement les lignes actives
         arc_logits_2d = arc_logits_2d[active]
         gold_heads = gold_heads[active]
