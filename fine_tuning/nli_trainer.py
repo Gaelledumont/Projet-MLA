@@ -1,6 +1,8 @@
 import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
 from tqdm import tqdm
 
 from model.camembert_for_pretraining import CamembertForPreTraining
@@ -61,7 +63,9 @@ def train_nli(
         epochs=3,
         lr=1e-5,
         batch_size=16,
-        device='cuda',
+        device="cuda",
+        rank=0,
+        world_size=1,
         out_model_path=None,
 ):
     """
@@ -72,11 +76,16 @@ def train_nli(
     # 2) On instancie CamemBERT pour la classification de séquences
     model = CamembertForSequenceClassification(pretrained, num_labels=num_labels).to(device)
 
+    # Wrap le modèle avec DDP
+    model = DDP(model, device_ids=[rank])
+
     # 3) On charge les datasets
     train_dataset = NLIDataset(train_path, tokenizer, label2id, max_len=512)
     dev_dataset = NLIDataset(dev_path, tokenizer, label2id, max_len=512)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    dev_loader = DataLoader(dev_dataset, batch_size=batch_size, shuffle=False)
+
+    train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset, num_replicas=world_size, rank=rank)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, sampler=train_sampler, num_workers=4)
+    dev_loader = DataLoader(dev_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
