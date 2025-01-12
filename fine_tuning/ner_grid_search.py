@@ -48,7 +48,8 @@ def grid_search_ner(
 
 if __name__=="__main__":
     tokenizer=SentencePieceTokenizer("data/processed/spm.model")
-    label2id={'B-LOC': 0, 'B-PER': 1, 'I-LOC': 2, 'I-MISC': 3, 'I-ORG': 4, 'I-PER': 5, 'O': 6}
+    label2id={'B-LOC': 0, 'B-PER': 1, 'I-LOC': 2, 'I-MISC': 3, 'I-ORG': 4, 'I-PER': 5, 'O': 6,
+              'B-MISC': 7, 'B-ORG': 8}
     id2label={v:k for k,v in label2id.items()}
     num_labels=len(label2id)
 
