@@ -46,7 +46,7 @@ class BiaffineDependencyParser(nn.Module):
         input_dim,
         arc_dim=512,
         rel_dim=512,
-        n_rels=30,
+        n_rels=57,
         arc_mlp_layers=2,
         rel_mlp_layers=2,
         dropout=0.2
@@ -77,7 +77,7 @@ class CamembertForParsing(nn.Module):
         camembert_pretrained,
         arc_dim=512,
         rel_dim=512,
-        n_rels=30,
+        n_rels=57,
         arc_mlp_layers=2,
         rel_mlp_layers=2,
         dropout=0.2
