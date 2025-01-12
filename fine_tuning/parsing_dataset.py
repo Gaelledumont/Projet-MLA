@@ -52,7 +52,8 @@ class ParsingDataset(Dataset):
                     head_id=0
                 if deprel not in self.rel2id:
                     # on lève une exception
-                    raise ValueError(f"Relation inconnue : {deprel}")
+                    print(f'Label inconnu {deprel}')
+                    continue
 
                 tokens.append(form)
                 heads.append(head_id)
