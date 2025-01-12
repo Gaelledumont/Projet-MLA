@@ -125,4 +125,4 @@ def train_parsing(
             torch.save(model.state_dict(),"camembert_parsing_best.pt")
             print(f"New best model saved (LAS={las*100:.2f}%)")
 
-    return model
+    return best_las
