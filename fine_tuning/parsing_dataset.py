@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 
 class ParsingDataset(Dataset):
     """
-    Lit un fichier .conllu
+    Lit un fichier .conllu et mappe chaque token vers un bloc de sous-tokens.
     Extrait (tokens, heads, relations).
     On ignore les lignes de commentaires '#' et les colonnes qu'on n'utilise pas.
 
@@ -13,6 +13,11 @@ class ParsingDataset(Dataset):
         super().__init__()
         # On parse et on stocke
         self.samples = []
+        self.tokenizer = tokenizer
+        self.rel2id = rel2id
+        self.max_len = max_len
+
+        # 1) On lit le conllu
         with open(conllu_path, "r", encoding="utf-8") as f:
             tokens = []
             heads = []
@@ -23,7 +28,7 @@ class ParsingDataset(Dataset):
                 if line.startswith("#"):
                     continue
                 if not line:
-                    # phrase terminée
+                    # nouvelle phrase
                     if tokens:
                         self.samples.append((tokens, heads, rels))
                         tokens, heads, rels=[],[],[]
@@ -34,20 +39,20 @@ class ParsingDataset(Dataset):
                     # ligne invalide
                     continue
                 try:
-                    token_id=int(cols[0])
+                    token_id = int(cols[0])
                 except:
                     continue
                 form = cols[1]
                 head = cols[6]
                 deprel = cols[7]
-
+                # conversion head
                 try:
                     head_id=int(head)
                 except:
                     head_id=0
-                if deprel not in rel2id:
+                if deprel not in self.rel2id:
                     # on lève une exception
-                    raise ValueError(f"Relation inconnu : {deprel}")
+                    raise ValueError(f"Relation inconnue : {deprel}")
 
                 tokens.append(form)
                 heads.append(head_id)
@@ -57,10 +62,6 @@ class ParsingDataset(Dataset):
             if tokens:
                 self.samples.append((tokens, heads, rels))
 
-        self.tokenizer=tokenizer
-        self.rel2id=rel2id
-        self.max_len=max_len
-
     def __len__(self):
         return len(self.samples)
 
@@ -69,48 +70,63 @@ class ParsingDataset(Dataset):
         # on encode les tokens en subwords
         # On va faire la concaténation subwords de chaque token => input_ids
         input_ids=[2] # <s>
-        attention_mask=[]
-        # On va stocker "token-level" heads & rels en un vecteur de même taille que nb tokens
-        new_heads=[]
-        new_rels=[]
 
+        start_positions = [] # pour chaque token i, on stocke la position subtoken de début
+
+        # offset subword actuel
+        current_pos = 1 # car on a déjà mis 2 (i.e. <s>)
         # On compte le nombre de tokens effectifs
         # subword alignment minimal : 1er subword => le token
         for i, (tok, hd, rl) in enumerate(zip(tokens,heads,rels)):
             subw = self.tokenizer.encode(tok)
             if len(subw) == 0:
-                continue
+                subw=[self.tokenizer.sp.PieceToId("<unk>")]
+            start_positions.append(current_pos)
+            input_ids.extend(subw)
+            current_pos += len(subw)
             # le 1er subw => correspond au token i
 
-            input_ids.extend(subw)
-            # on note la HEAD
-            new_heads.append(hd)
-            new_rels.append(self.rel2id[rl])
-
-        # On tronque
+        # On tronque si trop long
         input_ids = input_ids[:self.max_len]
-        attn_mask = [1]*len(input_ids)
+        # On ignore les tokens qui tombent hors subword range
+        valid_token_count = len(start_positions)
         while len(input_ids)<self.max_len:
             input_ids.append(self.tokenizer.pad_token_id())
-            attn_mask.append(0)
+        attention_mask = [1 if x!=self.tokenizer.pad_token_id() else 0 for x in input_ids]
 
-        # On convertit new_heads en un array de longueur = nb tokens
-        # => On a potentiellement plus de subwords que de tokens
-        # => On va faire heads = array de length = len(new_heads),
+        # new heads
+        new_heads = [-1]*valid_token_count
+        new_rels = [0]*valid_token_count
 
-        # on pad
-        # si c'est plus grand que max_len, c'est un corner case
-        tok_count = len(new_heads)
+        for i in range(valid_token_count):
+            hd = heads[i]
+            rl = rels[i]
+
+            if hd==0:
+                new_heads[i]=0
+            else:
+                if 1<=hd<=valid_token_count:
+                    head_subtoken = start_positions[hd-1]
+                    if head_subtoken<self.max_len:
+                        new_heads[i] = head_subtoken
+                    else:
+                        new_heads[i] = -1 # tronqué
+                else:
+                    new_heads[i] = -1
+            new_rels[i] = self.rel2id[rl]
+
         heads_out = [-1]*self.max_len
-        rels_out  = [0]*self.max_len
-        # On stocke sur les positions correspondantes (1er subtoken)
-        for i in range(min(tok_count, self.max_len)):
-            heads_out[i] = new_heads[i]
-            rels_out[i]  = new_rels[i]
+        rels_out = [0]*self.max_len
+
+        for i in range(valid_token_count):
+            pos = start_positions[i]
+            if pos<self.max_len:
+                heads_out[pos] = new_heads[i]
+                rels_out[pos] = new_rels[i]
 
         return (
             torch.tensor(input_ids, dtype=torch.long),
-            torch.tensor(attn_mask, dtype=torch.long),
+            torch.tensor(attention_mask, dtype=torch.long),
             torch.tensor(heads_out, dtype=torch.long),
             torch.tensor(rels_out,  dtype=torch.long)
         )
