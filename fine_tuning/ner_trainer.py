@@ -9,35 +9,39 @@ from model.camembert_for_ner import CamembertForNER
 # 1) On extrait des entités sur un schéma BIO
 def extract_entities_bio(labels):
     """
-    Reçoit une liste de labels, ex: ["O","B-PER","I-PER","O","B-LOC","I-LOC"].
-    Retourne une liste d'entités (start, end, type), où 'end' est inclusif.
+    Reçoit une liste de labels, ex: ["O","I-PER","I-LOC","0","I-ORG"].
+    Retourne une liste d'entités (start, end, type) en schéma I/O minimal ou BIO
     """
     entities = []
     start = None
     ent_type = None
 
     for i, lab in enumerate(labels):
-        if lab.startswith("B-"):
-            # on ferme l'éventuelle entité précédente
-            if start is not None:
-                entities.append((start, i-1, ent_type))
-            start = i
-            ent_type = lab[2:]
-        elif lab.startswith("I-"):
-            # si on n'était pas en entité, on peut soit forcer un B-, soit ignorer
-            # on simplifie en disant : si start is None, on commence ici
-            if start is None:
-                start = i
-                ent_type = lab[2:]
-            # sinon, on continue la même entité
-        else:
-            # "O" ou autre
+        if lab == "0":
+            # si on a une entité en cours
             if start is not None:
                 entities.append((start, i-1, ent_type))
                 start = None
-                ent_type = None
-
-    # fin de séquence
+                ent_type=None
+        else:
+            # s'il commence par "I-" on retire "I-"
+            if lab.startswith("I-") or lab.startswith("B-"):
+                current_type = lab[2:]
+            else:
+                current_type = lab
+            # si on n'était pas en entité, on peut soit forcer un B-, soit ignorer
+            # on simplifie en disant : si start is None, on démare une entité
+            if start is None:
+                start = i
+                ent_type = current_type
+            # sinon, on continue la même entité
+            else:
+                if current_type!=ent_type:
+                    # on ferme l'ancienne entité
+                    entities.append((start, i-1, ent_type))
+                    start = i
+                    ent_type = current_type
+    # "fin de séquence
     if start is not None:
         entities.append((start, len(labels)-1, ent_type))
     return entities
@@ -61,29 +65,37 @@ def compute_f1_bio(pred_labels, gold_labels):
 
 # 2) Dataset pour la NER
 class NERDataset(Dataset):
-    def __init__(self, conll_path, tokenizer, label2id, max_len=512):
+    """
+    Dataset adapté au format WikiNER
+    Chaque ligne est une phrase.
+    Chaque token = "mot|POS|labelNER", séparés par des espaces.
+    """
+    def __init__(self, wikiner_path, tokenizer, label2id, max_len=512):
         self.samples = []
-        with open(conll_path, 'r', encoding='utf-8') as f:
-            next(f)
-            tokens, labels = [], []
+        with open(wikiner_path, 'r', encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
                 if not line:
-                    if tokens:
-                        self.samples.append((tokens, labels))
-                        tokens, labels = [], []
+                    # ligne vide donc on ignore
                     continue
-                splits = line.split("\t")
-                if len(splits) >= 2:
-                    tok, lab, _, _ = splits
-                    # s'il n'existe pas, on lève une exception
-                    if lab not in label2id:
-                        raise ValueError(f"Label NER inconnu : {lab}")
-                    tokens.append(tok)
-                    labels.append(lab)
-            # fin du fichier
-            if tokens:
-                self.samples.append((tokens, labels))
+                chunks = line.split(" ")
+                tokens=[]
+                labels=[]
+                for c in chunks:
+                    splitted = c.split("|")
+                    if len(splitted)<3:
+                        # mal formé donc on ignore
+                        continue
+                    mot = splitted[0]
+                    ner = splitted[2] # la 3e colonne
+                    # check label
+                    if ner not in label2id:
+                        raise ValueError(f"Label NER inconnu : {ner}")
+                    tokens.append(mot)
+                    labels.append(ner)
+                # fin du fichier
+                if tokens:
+                    self.samples.append((tokens, labels))
 
         self.tokenizer = tokenizer
         self.label2id = label2id
@@ -101,7 +113,7 @@ class NERDataset(Dataset):
 
         for t, lab in zip(tokens, labels):
             sub_ids = self.tokenizer.encode(t)
-            if len(sub_ids)==0:
+            if not sub_ids:
                 continue
             # label
             lab_id = self.label2id[lab]
@@ -191,8 +203,8 @@ def train_ner(
     """
     Fine-tuning NER sur un jeu de données.
     :param pretrained_path: chemin du .pt pour CamembertForPreTraining
-    :param train_path: chemin du conll train
-    :param dev_path: chemin du conll dev
+    :param train_path: chemin du fichier train
+    :param dev_path: chemin du fichier dev
     :param tokenizer: instance de SentencePieceTokenizer
     :param label2id: dict { "B-PER":5, ...}
     :param id2label: dict inverse {5:"B-PER", ...}
@@ -206,9 +218,9 @@ def train_ner(
 
     # On charge les datasets
     train_data = NERDataset(train_path, tokenizer, label2id, max_len=512)
-    dev_data   = NERDataset(dev_path, tokenizer, label2id, max_len=512)
+    dev_data = NERDataset(dev_path, tokenizer, label2id, max_len=512)
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-    dev_loader   = DataLoader(dev_data, batch_size=batch_size, shuffle=False)
+    dev_loader = DataLoader(dev_data, batch_size=batch_size, shuffle=False)
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
@@ -250,6 +262,6 @@ def train_ner(
 
     if out_model_path and best_model_state is not None:
         torch.save(model.state_dict(), out_model_path)
-        print(f"Best model saved => {out_model_path} (F1={best_f1*100:.2f})")
+        print(f"Best model saved => {out_model_path} (f1={best_f1*100:.2f})")
 
     return best_f1
