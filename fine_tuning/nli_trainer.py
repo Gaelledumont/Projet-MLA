@@ -79,7 +79,7 @@ def train_nli(
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     best_acc=0.0
-    best_model_path=None
+    best_model_state=None
 
     for epoch in range(1, epochs+1):
         # train
@@ -119,9 +119,9 @@ def train_nli(
             print(f"New best dev acc={acc*100:.2f}%")
 
     # on recharge la best
-    if best_model_path is not None:
+    if best_model_state is not None:
         model.load_state_dict(best_model_state)
-    if out_model_path and best_model_path is not None:
+    if out_model_path and best_model_state is not None:
         torch.save(model.state_dict(), out_model_path)
         print(f"Best model saved => {out_model_path} (acc={best_acc*100:.2f}%)")
 
