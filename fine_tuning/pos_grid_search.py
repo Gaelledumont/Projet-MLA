@@ -11,7 +11,7 @@ def grid_search_pos(
     device="cuda"
 ):
     # On définit un grid
-    lrs = [1e-5, 3e-5, 5e-5, 1e-4, 3e-4, 5e-4]
+    lrs = [1e-5, 2e-5, 3e-5, 4e-5, 5e-5, 1e-4, 3e-4, 5e-4]
     batch_sizes = [16, 32]
 
     best_score=-1.0
