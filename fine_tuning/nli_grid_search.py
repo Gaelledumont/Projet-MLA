@@ -49,13 +49,13 @@ def grid_search_nli(
 
 if __name__=="__main__":
     tokenizer=SentencePieceTokenizer("data/processed/spm.model")
-    label2id={"entailment":0,"neutral":1,"contradiction":2}
+    label2id={"entailment":0,"neutral":1,"contradiction":2, "contradictory":3}
     num_labels= len(label2id)
 
     grid_search_nli(
-        model_path="checkpoints/camembert_pretrained.pt",
-        train_path="data/tasks/XNLI-1.0/multinli.train.fr.tsv",
-        dev_path="data/tasks/XNLI-1.0/xnli.dev.fr.tsv",
+        model_path="checkpoints/camembert_pretrained_4gb (1).pt",
+        train_path="data/tasks/nli/multinli.train.fr.tsv",
+        dev_path="data/tasks/nli/xnli.dev.fr.tsv",
         tokenizer=tokenizer,
         label2id=label2id,
         num_labels=num_labels
