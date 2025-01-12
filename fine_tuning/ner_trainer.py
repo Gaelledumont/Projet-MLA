@@ -242,4 +242,4 @@ def train_ner(
 
     # On peut recharger le best si on veut
     # model.load_state_dict(torch.load("camembert_ner_best.pt"))
-    return model
+    return best_f1
