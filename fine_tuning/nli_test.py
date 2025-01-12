@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from model.camembert_for_pretraining import CamembertForPreTraining
 from model.camembert_for_sequence_classification import CamembertForSequenceClassification
@@ -10,7 +11,7 @@ def evaluate_nli(model, test_loader, device='cuda'):
     model.eval()
     correct=0
     total=0
-    for input_ids, attention_mask, labels in test_loader:
+    for input_ids, attention_mask, labels in tqdm(test_loader):
         input_ids=input_ids.to(device)
         attention_mask=attention_mask.to(device)
         labels=labels.to(device)

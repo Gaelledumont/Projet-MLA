@@ -17,7 +17,7 @@ def evaluate_parsing(model, loader, device='cuda'):
     correct_arcs=0
     correct_rels=0
 
-    for input_ids, attention_mask, heads, rels in loader:
+    for input_ids, attention_mask, heads, rels in tqdm(loader):
         input_ids=input_ids.to(device)
         attention_mask=attention_mask.to(device)
         heads=heads.to(device)
