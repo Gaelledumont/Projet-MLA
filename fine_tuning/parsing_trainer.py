@@ -122,7 +122,7 @@ def train_parsing(
         # On sauvegarde si c'est meilleur
         if las>best_las:
             best_las=las
-            torch.save(model.state_dict(),"camembert_parsing_partut_best.pt")
+            torch.save(model.state_dict(),"camembert_parsing_rhapsodie_best.pt")
             print(f"New best model saved (LAS={las*100:.2f}%)")
 
     return best_las
