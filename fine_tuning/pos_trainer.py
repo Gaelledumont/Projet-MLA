@@ -25,11 +25,12 @@ class POSDataset(Dataset):
                     t = splits[1]  # Token
                     lab = splits[3]  # UPOS
                     tokens.append(t)
-                    # si lab n'existe pas dans label2id, on lève une exception
                     if lab == '_':
+                        # on ignore les tokens sans UPOS
                         continue
+                    # si lab n'existe pas dans label2id, on lève une exception
                     if lab not in label2id:
-                        raise ValueError(f"Label '{lab}' inconnu dans label2id !")
+                        raise ValueError(f"Unknow POS label '{lab}'")
                     labels.append(lab)
             if tokens:
                 self.samples.append((tokens, labels))
@@ -42,12 +43,12 @@ class POSDataset(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        tokens, labels=self.samples[idx]
-        input_ids=[2]
+        tokens, labels = self.samples[idx]
+        input_ids = [2] # <s> roberta
         label_ids=[-100]
         for t, lab in zip(tokens, labels):
             subids=self.tokenizer.encode(t)
-            if len(subids)==0:
+            if not subids:
                 continue
             lab_id=self.label2id[lab] # on a vérifié plus haut qu'il existe
             input_ids += subids
@@ -74,40 +75,48 @@ def train_pos(
     tokenizer,
     label2id,
     num_labels,
-    lr=3e-5,
-    epochs=3,
+    lr,
+    max_epochs=30,
     batch_size=16,
-    device="cuda"
+    device="cuda",
+    out_model_path=None
 ):
     """
-    Fine-tune un CamembertForTokenClassification sur le POS tagging.
+    Fine-tune CamembertForTokenClassification sur le POS tagging jusqu'à 30 époques.
+    On renvoie la meilleure accuracy dev rencontrée
     """
-    # On charge le modèle
+    # 1) On charge le modèle
     pretrained=CamembertForPreTraining.load_pretrained(pretrained_path, device=device)
-    # On crée la tête POS
+    # 2) On crée la tête POS
     model=CamembertForTokenClassification(pretrained, num_labels).to(device)
 
-    # On charge les datasets
+    # 3) On charge les datasets
     train_data=POSDataset(train_path, tokenizer, label2id, max_len=512)
     dev_data=POSDataset(dev_path, tokenizer, label2id, max_len=512)
     train_loader=DataLoader(train_data,batch_size=batch_size,shuffle=True)
     dev_loader=DataLoader(dev_data,batch_size=batch_size,shuffle=False)
 
+    # 4) Optim
     optimizer=optim.Adam(model.parameters(),lr=lr)
 
     best_acc=0.0
-    for e in range(1, epochs+1):
+    best_model_state=None
+
+    for e in range(1, max_epochs+1):
+        # train
         model.train()
         total_loss=0.0
         for input_ids, attn_mask, labels in tqdm(train_loader, desc=f"Epoch {e}"):
             input_ids=input_ids.to(device)
             attn_mask=attn_mask.to(device)
             labels=labels.to(device)
+
             optimizer.zero_grad()
             logits, loss=model(input_ids,attn_mask,labels=labels)
             loss.backward()
             optimizer.step()
             total_loss+=loss.item()
+
         avg_loss=total_loss/len(train_loader)
         print(f"[Epoch {e}] train loss={avg_loss:.4f}")
 
@@ -130,7 +139,14 @@ def train_pos(
         # On sauvegarde
         if acc>best_acc:
             best_acc=acc
-            torch.save(model.state_dict(), "camembert_pos_best.pt")
-            print(f"New best model saved (acc={acc*100:.2f}%)")
+            best_model_state=model.state_dict()
+            print(f"New best dev acc={acc*100:.2f}%) (epoch={e})")
 
-    return model
+    # restore best at end
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
+    if out_model_path and best_model_state is not None:
+        torch.save(model.state_dict(), out_model_path)
+        print(f"Best model saved to {out_model_path} (acc={best_acc*100:.2f}%)")
+
+    return best_acc
