@@ -3,19 +3,7 @@ from torch.utils.data import DataLoader
 
 from model.camembert_for_pretraining import CamembertForPreTraining
 from model.camembert_for_ner import CamembertForNER
-from fine_tuning.ner_trainer import NERDataset, extract_entities_bio
-
-def compute_f1_bio(pred_labels, gold_labels):
-    # pareil que dans ner_trainer
-    pred_ents = set(extract_entities_bio(pred_labels))
-    gold_ents = set(extract_entities_bio(gold_labels))
-    tp = len(pred_ents & gold_ents)
-    fp = len(pred_ents - gold_ents)
-    fn = len(gold_ents - pred_ents)
-    prec = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-    rec = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-    f1 = 2 * (prec * rec) / (prec + rec) if (prec + rec) > 0 else 0.0
-    return tp, fp, fn, prec, rec, f1
+from fine_tuning.ner_trainer import NERDataset, compute_f1_bio
 
 def evaluate_ner_f1(model, test_loader, id2label, device='cuda'):
     model.eval()
@@ -67,14 +55,19 @@ def test_ner(
     batch_size=16,
     device='cuda'
 ):
+    """
+    On charge le modèle fine-tuné et on l'évalue sur la base de test
+    """
     pretrained = CamembertForPreTraining.load_pretrained(base_pretrained_path, device=device)
     num_labels = len(label2id)
     model = CamembertForNER(pretrained, num_labels).to(device)
 
+    # On charge les poids du modèle fine-tuné
     state = torch.load(best_model_path, map_location=device)
     model.load_state_dict(state)
 
-    test_data = NERDataset(test_path, tokenizer, label2id)
+    # On charge le dataset de test
+    test_data = NERDataset(test_path, tokenizer, label2id, max_len=512)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
 
     prec, rec, f1 = evaluate_ner_f1(model, test_loader, id2label, device)
