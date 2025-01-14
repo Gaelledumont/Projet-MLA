@@ -4,6 +4,8 @@ from torch.utils.data import DataLoader
 from model.camembert_for_pretraining import CamembertForPreTraining
 from model.camembert_for_parsing import CamembertForParsing
 from fine_tuning.parsing_trainer import ParsingDataset, evaluate_parsing
+from parsing_training import rel2id
+
 
 def test_parsing(
     best_mode_path,
@@ -13,7 +15,7 @@ def test_parsing(
     rel2id,
     arc_dim=512,
     rel_dim=512,
-    n_rels=30,
+    n_rels=len(rel2id),
     batch_size=16,
     device='cuda'
 ):
