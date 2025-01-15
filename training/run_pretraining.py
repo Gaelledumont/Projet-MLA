@@ -72,7 +72,7 @@ def main():
         print(f"No dev shard found. Perplexity won't be tracked.")
 
     # 7) Trainer + scheduler polynomial
-    total_steps = 400000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
+    total_steps = 100000 # 100k steps mais on peut aller jusqu'à 500k d'après l'article
     warmup_steps = 10000
     trainer = Trainer(
         model=model,
