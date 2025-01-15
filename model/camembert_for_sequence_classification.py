@@ -10,8 +10,7 @@ class CamembertForSequenceClassification(nn.Module):
 
     def forward(self, input_ids, attention_mask=None, labels=None):
         outputs = self.camembert(input_ids, attention_mask=attention_mask)
-        # on prend le hidden state du premier token (ex: <s>)
-        # si on veut faire un pooling, on peut
+        # on prend le hidden state du premier token
         cls_output = outputs[:, 0, :]
         cls_output = self.dropout(cls_output)
         logits = self.classifier(cls_output)
