@@ -5,7 +5,7 @@ def train_sentencepiece(corpus_path, model_prefix="spm", vocab_size=32000):
     """
     Entraîne un tokenizer SentencePiece sur le fichier corpus_path et génère spm.model et spm.vocab.
     """
-    # Paramètres pour un tokenizer de type BPE
+    # Paramètres
     spm_cmd = (
         f"--input={corpus_path} "
         f"--model_prefix={model_prefix} "
