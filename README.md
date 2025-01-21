@@ -191,6 +191,27 @@ python fine_tuning/pos_grid_search.py \
 ```
 Replace `<dataset>` with `gsd`, `sequoia`, `rhapsodie` or `partut`.
 
+### Dependency parsing
+```bash
+python fine_tuning/parsing_grid_search.py \
+    --pretrained_path checkpoints/camembert_pretrained_4gb.pt \
+    --train_path data/tasks/parsing/fr_<dataset>-ud-train.conllu \
+    --dev_path data/tasks/parsing/fr_<dataset>-ud-dev.conllu \
+    --tokenizer data/processed/spm.model
+    --device cuda
+```
+Replace `<dataset>` with `gsd`, `sequoia`, `rhapsodie` or `partut`.
+
+### NER
+```bash
+python fine_tuning/ner_grid_search.py \
+    --pretrained_path checkpoints/camembert_pretrained_4gb.pt \
+    --train_path data/tasks/parsing/fr_<dataset>-ud-train.conllu \
+    --dev_path data/tasks/parsing/fr_<dataset>-ud-dev.conllu \
+    --tokenizer data/processed/spm.model
+    --device cuda
+```
+
 ### 5. **Compare Results**
 
 - Compare performance with existing CamemBERT
