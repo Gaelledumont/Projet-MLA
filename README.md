@@ -1,8 +1,6 @@
-# Projet-MLA
+# CamemBERT Replication Study
 
-## Reproducing the CamemBERT Model
-
-This project aims to replicate the experimental results of the paper *CamemBERT: a Tasty French Language Model*. The goal is to implement the proposed architecture in TensorFlow or PyTorch and validate its performance on various NLP tasks using a GPU.
+This repository contains a from-scratch implementation of the CamemBERT model in PyTorch, as described in the paper "CamemBERT: a Tasty French Language Model" by Martin et al. (2019). This project was undertaken as a replication study to gain a deeper understanding of the model and to validate the original findings.
 
 ---
 
@@ -10,7 +8,7 @@ This project aims to replicate the experimental results of the paper *CamemBERT:
 
 - Implement the CamemBERT architecture (based on RoBERTa) for the French language.
 - Train the model on OSCAR.
-- Evaluate performance on NLP tasks: POS tagging, parsing, NER, and NLI.
+- Evaluate performance on NLP tasks: POS tagging, dependency parsing, NER and NLI.
 - Compare the results with those of the original paper.
 
 ---
