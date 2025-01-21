@@ -86,13 +86,13 @@ if __name__ == "__main__":
 
 3. **Train the SentencePiece model:**
 
-```python
+```bash
 python tokenization/train_sentencepiece.py
 ```
 
 4. **Chunk and tokenize the corpus:**
 
-```python
+```bash
 python data_preparation/chunk_and_tokenize.py
 ```
 
