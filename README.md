@@ -2,38 +2,25 @@
 
 This repository contains a from-scratch implementation of the CamemBERT model in PyTorch, as described in the paper "CamemBERT: a Tasty French Language Model" by Martin et al. (2019). This project was undertaken as a replication study to gain a deeper understanding of the model and to validate the original findings.
 
----
+## Dependencies
 
-## 📊 **Project Objectives**
+* Language: Python 3.8+
+* Framework: PyTorch
+* GPU: CUDA / cuDNN installed for hardware acceleration
+* NumPy
+* sentencepiece
+* tqdm
+* datasets (for downloading the original OSCAR corpus if needed)
 
-- Implement the CamemBERT architecture (based on RoBERTa) for the French language.
-- Train the model on OSCAR.
-- Evaluate performance on NLP tasks: POS tagging, dependency parsing, NER and NLI.
-- Compare the results with those of the original paper.
-
----
-
-## 🔧 **Prerequisites**
-
-### **Development Environment**
-
-- **Language**: Python 3.8+
-- **Framework**: PyTorch
-- **GPU**: CUDA / cuDNN installed for hardware acceleration
-
-### **Required Libraries**
+You can install the required packages using pip:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+## Data Preparation
 
-## 🚀 **Steps to Reproduce**
-
-### 1. **Data Preparation**
-
-a. Download the 4GB subset of the OSCAR corpus (optional):
+1. **Download the 4GB subset of the OSCAR corpus (optional):**
 - If you need to create the `oscar_fr_4GB.txt` file, use the provided Python script in the report to download and extract a 4GB subset from Hugging Face Datasets:
 ```python
 from datasets import load_dataset
@@ -78,7 +65,7 @@ print(f"Data downloaded to: {output_filename}")
 print(f"Total size: {total_size / (1024 * 1024 * 1024):.2f} GB")
 ```
 
-b. Fix encoding errors:
+2. **Fix encoding errors:**
 - The raw `oscar_fr_4GB.txt` file might contain encoding errors. To fix these, run the following script:
 ```python
 import ftfy
