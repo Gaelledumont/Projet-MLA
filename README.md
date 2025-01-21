@@ -164,6 +164,19 @@ python data_preparation/chunk_and_tokenize.py
           fout.write(f"{premise}\t{hypothesis}\t{label_str}\n")
       ```
   - Place the files in `data/tasks/nli`.
+ 
+## Pre-training
+
+To pre-train the CamemBERT model, run the following command:
+```bash
+python training/run_pretraining.py
+```
+
+**Important notes:**
+
+- The pre-training script uses a polynomial learning rate decay schedule with a warmup. The default parameters are set in the `Trainer` class in `Projet-MLA/training/trainer.py`
+- The script logs the training loss, learning rate, and validation perplexity (if a dev set is provided) every 1000 steps to the console and to a `pretraining_log.txt` file.
+- Training will run for 100,000 steps. You can adjust this in `run_pretraining.py`
 
 ### 4. **Evaluation on Downstream Tasks**
 
