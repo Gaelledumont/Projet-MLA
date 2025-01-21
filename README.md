@@ -84,7 +84,19 @@ if __name__ == "__main__":
 - This script uses the `ftfy` library to automatically correct encoding issues.
 - The corrected file will be saved as `oscar_fr_4GB_fixed.txt` in the `data/raw/` directory.
 
-- Tokenize the data using **SentencePiece**.
+3. **Train the SentencePiece model:**
+
+```python
+python tokenization/train_sentencepiece.py
+```
+
+4. **Chunk and tokenize the corpus:**
+
+```python
+python data_preparation/chunk_and_tokenize.py
+```
+
+5. **Download the downstream task datasets:**
 
 ### 2. **Model Implementation**
 
