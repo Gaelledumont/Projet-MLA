@@ -97,6 +97,73 @@ python data_preparation/chunk_and_tokenize.py
 ```
 
 5. **Download the downstream task datasets:**
+- **POS tagging and dependency parsing:**
+    - Download the Universal Dependencies (UD) French Datasets (GSD, Sequoia, Rhapsodie, ParTUT) in CoNLL-U format.
+    - Place the `.conllu` files for each dataset in the `data/tasks/pos/` and `data/tasks/parsing` directories, respectively. You should have `train.conllu`, `dev.conllu` and `test.conllu` for each dataset.
+ 
+- **NER:**
+    - Download the WikiNER dataset.
+    - **Note:** The WikiNER dataset does not come with a predefined train/dev/test split. We created our own split, using the following code:
+      ```python
+      import random
+
+      def split_wikiner(input_file, train_file, dev_file, test_file, ratio=(0.8, 0.1, 0.1)):
+          with open(input_file, 'r', encoding='utf-8') as f:
+          lines = f.readlines()
+
+          # shuffle
+          random.shuffle(lines)
+
+          n = len(lines)
+          n_train = int(n*ratio[0])
+          n_dev   = int(n*ratio[1])
+          # test => the remainder
+          n_test  = n - n_train - n_dev
+
+          train_part = lines[:n_train]
+          dev_part   = lines[n_train:n_train+n_dev]
+          test_part  = lines[n_train+n_dev:]
+
+          with open(train_file, 'w', encoding='utf-8') as f:
+              for l in train_part:
+              f.write(l)
+          with open(dev_file, 'w', encoding='utf-8') as f:
+              for l in dev_part:
+              f.write(l)
+          with open(test_file, 'w', encoding='utf-8') as f:
+              for l in test_part:
+              f.write(l)
+
+          if __name__=="__main__":
+              input_file="aij-wikiner-fr-wp3.txt"
+              split_wikiner(
+                  input_file,
+                  train_file="wiki_fr_train.txt",
+                  dev_file="wiki_fr_dev.txt",
+                  test_file="wiki_fr_test.txt"
+              )
+              print("Splits created: wiki_fr_train.txt, wiki_fr_dev.txt, wiki_fr_test.txt")
+      ```
+  - Place the files in `data/tasks/ner`.
+
+- **NLI:**
+    - Download the XNLI dataset and extract the French portion.
+    - **Note:** The original XNLI dev and test files contain 19 columns. We extracted the relevant columns (premise, hypothesis, label) and saved them using the following code:
+      ```python
+      with open("xnli.dev.fr.tsv", "r", encoding="utf-8") as fin, \
+      open("xnli.dev.fr.3cols.tsv", "w", encoding="utf-8") as fout:
+      lines = fin.read().strip().split("\n")
+      for line in lines:
+          splits=line.split("\t")
+          if len(splits)<8:
+              continue
+          label_str  = splits[2]
+          premise    = splits[6]
+          hypothesis = splits[7]
+          # write
+          fout.write(f"{premise}\t{hypothesis}\t{label_str}\n")
+      ```
+  - Place the files in `data/tasks/nli`.
 
 ### 2. **Model Implementation**
 
