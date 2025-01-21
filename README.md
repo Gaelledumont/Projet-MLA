@@ -178,10 +178,13 @@ python training/run_pretraining.py
 - The script logs the training loss, learning rate, and validation perplexity (if a dev set is provided) every 1000 steps to the console and to a `pretraining_log.txt` file.
 - Training will run for 100,000 steps. You can adjust this in `run_pretraining.py`
 
-### 4. **Evaluation on Downstream Tasks**
+## Fine-tuning
 
-- Implement NLP tasks: POS tagging, NER, parsing, and NLI.
-- Using benchmarks like **Universal Dependencies (UD)** and **XNLI**:
+### POS tagging
+```bash
+python fine_tuning/pos_grid_search.py
+```
+Replace 
 
 ### 5. **Compare Results**
 
