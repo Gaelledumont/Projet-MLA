@@ -165,16 +165,6 @@ python data_preparation/chunk_and_tokenize.py
       ```
   - Place the files in `data/tasks/nli`.
 
-### 2. **Model Implementation**
-
-- Recreate the CamemBERT architecture using PyTorch.
-- Implement dynamic whole-word masking.
-
-### 3. **Training**
-
-- Set up the **Masked Language Modeling (MLM)** objective.
-- Train the model on a GPU using a small sample (4 GB)
-
 ### 4. **Evaluation on Downstream Tasks**
 
 - Implement NLP tasks: POS tagging, NER, parsing, and NLI.
@@ -184,4 +174,3 @@ python data_preparation/chunk_and_tokenize.py
 
 - Compare performance with existing CamemBERT
 - Analyze the impact of corpus size and origin on results.
----
