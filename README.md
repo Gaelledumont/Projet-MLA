@@ -175,7 +175,7 @@ python training/run_pretraining.py
 **Important notes:**
 
 - The pre-training script uses a polynomial learning rate decay schedule with a warmup. The default parameters are set in the `Trainer` class in `Projet-MLA/training/trainer.py`
-- The script logs the training loss, learning rate, and validation perplexity (if a dev set is provided) every 1000 steps to the console and to a `pretraining_log.txt` file.
+- The script logs the training loss and learning rate every 1000 steps to the console and to a `pretraining_log.txt` file. Validation perplexity is evaluated every 2000 steps if a development set is provided.
 - Training will run for 100,000 steps. You can adjust this in `run_pretraining.py`
 
 ## Fine-tuning
