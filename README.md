@@ -204,15 +204,18 @@ Replace `<dataset>` with `gsd`, `sequoia`, `rhapsodie` or `partut`.
 
 ### NER
 ```bash
-python fine_tuning/ner_grid_search.py \
-    --pretrained_path checkpoints/camembert_pretrained_4gb.pt \
-    --train_path data/tasks/parsing/fr_<dataset>-ud-train.conllu \
-    --dev_path data/tasks/parsing/fr_<dataset>-ud-dev.conllu \
-    --tokenizer data/processed/spm.model
-    --device cuda
+python fine_tuning/ner_grid_search.py
 ```
 
-### 5. **Compare Results**
+### NLI
+```bash
+python fine_tuning/nli_grid_search.py
+```
 
-- Compare performance with existing CamemBERT
-- Analyze the impact of corpus size and origin on results.
+## Evaluation
+To evaluate the fine-tuned models on the test set, use the following scripts:
+
+- `fine_tuning/pos_test.py`
+- `fine_tuning/parsing_test.py`
+- `fine_tuning/ner_test.py`
+- `fine_tuning/nli_test.py`
