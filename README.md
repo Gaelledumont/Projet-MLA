@@ -157,7 +157,7 @@ python data_preparation/chunk_and_tokenize.py
           splits=line.split("\t")
           if len(splits)<8:
               continue
-          label_str  = splits[2]
+          label_str  = splits[1]
           premise    = splits[6]
           hypothesis = splits[7]
           # write
