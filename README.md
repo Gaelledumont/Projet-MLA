@@ -21,7 +21,7 @@ pip install -r requirements.txt
 ## Data Preparation
 
 1. **Download the 4GB subset of the OSCAR corpus (optional):**
-- If you need to create the `oscar_fr_4GB.txt` file, use the provided Python script in the report to download and extract a 4GB subset from Hugging Face Datasets:
+- If you need to create the `oscar_fr_4GB.txt` file, use the provided Python script below to download and extract a 4GB subset from Hugging Face Datasets:
 ```python
 from datasets import load_dataset
 import os
