@@ -116,13 +116,13 @@ python data_preparation/chunk_and_tokenize.py
 
           n = len(lines)
           n_train = int(n*ratio[0])
-          n_dev   = int(n*ratio[1])
+          n_dev = int(n*ratio[1])
           # test => the remainder
-          n_test  = n - n_train - n_dev
+          n_test = n - n_train - n_dev
 
           train_part = lines[:n_train]
-          dev_part   = lines[n_train:n_train+n_dev]
-          test_part  = lines[n_train+n_dev:]
+          dev_part = lines[n_train:n_train+n_dev]
+          test_part = lines[n_train+n_dev:]
 
           with open(train_file, 'w', encoding='utf-8') as f:
               for l in train_part:
@@ -134,15 +134,15 @@ python data_preparation/chunk_and_tokenize.py
               for l in test_part:
               f.write(l)
 
-          if __name__=="__main__":
-              input_file="aij-wikiner-fr-wp3.txt"
-              split_wikiner(
-                  input_file,
-                  train_file="wiki_fr_train.txt",
-                  dev_file="wiki_fr_dev.txt",
-                  test_file="wiki_fr_test.txt"
-              )
-              print("Splits created: wiki_fr_train.txt, wiki_fr_dev.txt, wiki_fr_test.txt")
+      if __name__=="__main__":
+          input_file="aij-wikiner-fr-wp3.txt"
+          split_wikiner(
+              input_file,
+              train_file="wiki_fr_train.txt",
+              dev_file="wiki_fr_dev.txt",
+              test_file="wiki_fr_test.txt"
+          )
+          print("Splits created: wiki_fr_train.txt, wiki_fr_dev.txt, wiki_fr_test.txt")
       ```
   - Place the files in `data/tasks/ner`.
 
