@@ -56,8 +56,8 @@ if __name__=="__main__":
 
     grid_search_pos(
         pretrained_path="checkpoints/camembert_pretrained_4gb.pt",
-        train_path="data/tasks/pos/train.conll",
-        dev_path="data/tasks/pos/dev.conll",
+        train_path="data/tasks/pos/fr_gsd-ud-train.conllu",
+        dev_path="data/tasks/pos/fr_gsd-ud-dev.conllu",
         tokenizer=tokenizer,
         label2id=label2id,
         num_labels=num_labels,
