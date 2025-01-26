@@ -182,7 +182,7 @@ python -m training/run_pretraining.py
 
 ### POS tagging
 ```bash
-python -m fine_tuning/pos_grid_search.py \
+python -m fine_tuning.pos_grid_search \
     --pretrained_path checkpoints/camembert_pretrained_4gb.pt \
     --train_path data/tasks/pos/fr_<dataset>-ud-train.conllu \
     --dev_path data/tasks/pos/fr_<dataset>-ud-dev.conllu \
@@ -193,7 +193,7 @@ Replace `<dataset>` with `gsd`, `sequoia`, `rhapsodie` or `partut`.
 
 ### Dependency parsing
 ```bash
-python -m fine_tuning/parsing_grid_search.py \
+python -m fine_tuning.parsing_grid_search \
     --pretrained_path checkpoints/camembert_pretrained_4gb.pt \
     --train_path data/tasks/parsing/fr_<dataset>-ud-train.conllu \
     --dev_path data/tasks/parsing/fr_<dataset>-ud-dev.conllu \
@@ -204,12 +204,12 @@ Replace `<dataset>` with `gsd`, `sequoia`, `rhapsodie` or `partut`.
 
 ### NER
 ```bash
-python -m fine_tuning/ner_grid_search.py
+python -m fine_tuning.ner_grid_search
 ```
 
 ### NLI
 ```bash
-python -m fine_tuning/nli_grid_search.py
+python -m fine_tuning.nli_grid_search
 ```
 
 ## Evaluation
