@@ -1,5 +1,19 @@
 from fine_tuning.pos_trainer import train_pos
 from tokenization.sentencepiece_tokenizer import SentencePieceTokenizer
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--pretrained_path', type=str,
+                       default="checkpoints/camembert_pretrained_4gb.pt")
+    parser.add_argument('--train_path', type=str,
+                       default="data/tasks/pos/fr_gsd-ud-train.conllu")
+    parser.add_argument('--dev_path', type=str,
+                       default="data/tasks/pos/fr_gsd-ud-dev.conllu")
+    parser.add_argument('--tokenizer', type=str,
+                       default="data/processed/spm.model")
+    parser.add_argument('--device', type=str, default='cuda')
+    return parser.parse_args()
 
 def grid_search_pos(
     pretrained_path,
@@ -46,7 +60,9 @@ def grid_search_pos(
     print(f"Checkpoint => {best_ckpt}")
 
 if __name__=="__main__":
-    tokenizer = SentencePieceTokenizer("data/processed/spm.model")
+    args = parse_args()
+
+    tokenizer = SentencePieceTokenizer(args.tokenizer)
     label2id={
         'ADJ': 0, 'ADP': 1, 'ADV': 2, 'AUX': 3, 'CCONJ': 4, 'DET': 5, 'INTJ': 6, 'NOUN': 7,
         'NUM': 8, 'PRON': 9, 'PROPN': 10, 'PUNCT': 11, 'SCONJ': 12, 'SYM': 13, 'VERB': 14,
@@ -55,11 +71,11 @@ if __name__=="__main__":
     num_labels = len(label2id)
 
     grid_search_pos(
-        pretrained_path="checkpoints/camembert_pretrained_4gb.pt",
-        train_path="data/tasks/pos/fr_gsd-ud-train.conllu",
-        dev_path="data/tasks/pos/fr_gsd-ud-dev.conllu",
+        pretrained_path=args.pretrained_path,
+        train_path=args.train_path,
+        dev_path=args.dev_path,
         tokenizer=tokenizer,
         label2id=label2id,
         num_labels=num_labels,
-        device="cuda"
+        device=args.device
     )
