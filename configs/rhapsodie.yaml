@@ -1,0 +1,27 @@
+# Configuration for Rhapsodie dataset
+dataset_name: rhapsodie
+
+# Label mapping
+label2id:
+  ADJ: 0
+  ADP: 1
+  ADV: 2
+  AUX: 3
+  CCONJ: 4
+  DET: 5
+  INTJ: 6
+  NOUN: 7
+  NUM: 8
+  PRON: 9
+  PROPN: 10
+  PUNCT: 11
+  SCONJ: 12
+  VERB: 13
+  X: 14
+  _: 15
+
+# Training parameters
+training:
+  learning_rates: [1e-5, 2e-5, 3e-5, 4e-5, 5e-5, 1e-4, 3e-4, 5e-4]
+  batch_sizes: [16, 32]
+  max_epochs: 30
