@@ -1,5 +1,5 @@
-# Configuration for GSD dataset
-dataset_name: gsd
+# Configuration for Sequoia dataset
+dataset_name: sequoia
 
 # Label mapping
 label2id:
