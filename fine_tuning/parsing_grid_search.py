@@ -57,7 +57,7 @@ def grid_search_parsing(
         device="cuda"
 ):
     rel2id = config['rel2id']
-    num_labels = len(rel2id)
+    n_rels = len(rel2id)  # Nombre de relations
     lrs = [float(lr) for lr in config['training']['learning_rates']]
     batch_sizes = [int(bs) for bs in config['training']['batch_sizes']]
     max_epochs = int(config['training'].get('max_epochs', 30))
@@ -76,11 +76,11 @@ def grid_search_parsing(
                 dev_path=dev_path,
                 tokenizer=tokenizer,
                 rel2id=rel2id,
-                num_labels=num_labels,
+                n_rels=n_rels,  # On utilise n_rels au lieu de num_labels
                 lr=lr,
                 batch_size=bs,
                 device=device,
-                max_epochs=max_epochs,
+                epochs=max_epochs,  # Notez aussi que c'est 'epochs' et non 'max_epochs'
                 out_model_path=ckpt_name
             )
             print(f"[GRID] dev_las={dev_las * 100:.2f}% => (lr={lr}, bs={bs})")
