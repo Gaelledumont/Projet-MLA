@@ -61,9 +61,10 @@ def grid_search_pos(
     # On utilise les paramètres de configuration
     label2id = config['label2id']
     num_labels = len(label2id)
-    lrs = config['training']['learning_rates']
-    batch_sizes = config['training']['batch_sizes']
-    max_epochs = config['training'].get('max_epochs', 30)  # valeur par défaut si non spécifiée
+    # Conversion explicite en float
+    lrs = [float(lr) for lr in config['training']['learning_rates']]
+    batch_sizes = [int(bs) for bs in config['training']['batch_sizes']]
+    max_epochs = int(config['training'].get('max_epochs', 30))
 
     best_score = -1.0
     best_config = None
