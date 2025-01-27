@@ -80,7 +80,7 @@ def grid_search_parsing(
                 lr=lr,
                 batch_size=bs,
                 device=device,
-                epochs=max_epochs,  # Notez aussi que c'est 'epochs' et non 'max_epochs'
+                epochs=max_epochs,
                 out_model_path=ckpt_name
             )
             print(f"[GRID] dev_las={dev_las * 100:.2f}% => (lr={lr}, bs={bs})")
