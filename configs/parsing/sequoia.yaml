@@ -1,0 +1,66 @@
+# Configuration for Sequoia dataset
+dataset_name: sequoia
+
+# Relation mapping
+rel2id:
+  _: 0
+  acl: 1
+  acl:relcl: 2
+  advcl: 3
+  advcl:cleft: 4
+  advmod: 5
+  amod: 6
+  appos: 7
+  aux: 8
+  aux:caus: 9
+  aux:pass: 10
+  aux:tense: 11
+  case: 12
+  cc: 13
+  ccomp: 14
+  conj: 15
+  cop: 16
+  csubj: 17
+  csubj:pass: 18
+  dep: 19
+  dep:comp: 20
+  det: 21
+  discourse: 22
+  dislocated: 23
+  expl:comp: 24
+  expl:pass: 25
+  expl:pv: 26
+  expl:subj: 27
+  fixed: 28
+  flat:foreign: 29
+  flat:name: 30
+  goeswith: 31
+  iobj: 32
+  iobj:agent: 33
+  mark: 34
+  nmod: 35
+  nsubj: 36
+  nsubj:caus: 37
+  nsubj:outer: 38
+  nsubj:pass: 39
+  nummod: 40
+  obj: 41
+  obj:agent: 42
+  obj:lvc: 43
+  obl: 44
+  obl:agent: 45
+  obl:arg: 46
+  obl:mod: 47
+  orphan: 48
+  parataxis: 49
+  parataxis:insert: 50
+  punct: 51
+  root: 52
+  vocative: 53
+  xcomp: 54
+
+# Training parameters
+training:
+  learning_rates: [1.0e-5, 2.0e-5, 3.0e-5, 4.0e-5, 5.0e-5, 1.0e-4, 3.0e-4, 5.0e-4]
+  batch_sizes: [16, 32]
+  max_epochs: 30
