@@ -1,0 +1,64 @@
+# Configuration for Rhapsodie dataset
+dataset_name: rhapsodie
+
+# Relation mapping
+rel2id:
+  _: 0
+  acl: 1
+  acl:relcl: 2
+  advcl: 3
+  advcl:cleft: 4
+  advmod: 5
+  amod: 6
+  appos: 7
+  aux: 8
+  aux:caus: 9
+  aux:pass: 10
+  aux:tense: 11
+  case: 12
+  cc: 13
+  ccomp: 14
+  compound: 15
+  conj: 16
+  cop: 17
+  csubj: 18
+  csubj:pass: 19
+  dep: 20
+  dep:comp: 21
+  det: 22
+  discourse: 23
+  dislocated: 24
+  expl:comp: 25
+  expl:pass: 26
+  expl:subj: 27
+  fixed: 28
+  flat: 29
+  flat:name: 30
+  iobj: 31
+  mark: 32
+  nmod: 33
+  nmod:appos: 34
+  nsubj: 35
+  nsubj:caus: 36
+  nsubj:pass: 37
+  nummod: 38
+  obj: 39
+  obj:lvc: 40
+  obl:agent: 41
+  obl:arg: 42
+  obl:mod: 43
+  orphan: 44
+  parataxis: 45
+  parataxis:insert: 46
+  parataxis:parenth: 47
+  punct: 48
+  reparandum: 49
+  root: 50
+  vocative: 51
+  xcomp: 52
+
+# Training parameters
+training:
+  learning_rates: [1.0e-5, 2.0e-5, 3.0e-5, 4.0e-5, 5.0e-5, 1.0e-4, 3.0e-4, 5.0e-4]
+  batch_sizes: [16, 32]
+  max_epochs: 30
