@@ -1,0 +1,56 @@
+# Configuration for ParTUT dataset
+dataset_name: partut
+
+# Relation mapping
+rel2id:
+  _: 0
+  acl: 1
+  acl:relcl: 2
+  advcl: 3
+  advmod: 4
+  amod: 5
+  appos: 6
+  aux: 7
+  aux:caus: 8
+  aux:pass: 9
+  case: 10
+  cc: 11
+  ccomp: 12
+  compound: 13
+  conj: 14
+  cop: 15
+  csubj: 16
+  csubj:pass: 17
+  dep: 18
+  det: 19
+  discourse: 20
+  dislocated: 21
+  expl: 22
+  fixed: 23
+  flat: 24
+  flat:foreign: 25
+  flat:name: 26
+  iobj: 27
+  iobj:agent: 28
+  mark: 29
+  nmod: 30
+  nsubj: 31
+  nsubj:caus: 32
+  nsubj:pass: 33
+  nummod: 34
+  obj: 35
+  obj:agent: 36
+  obl: 37
+  obl:agent: 38
+  orphan: 39
+  parataxis: 40
+  punct: 41
+  root: 42
+  vocative: 43
+  xcomp: 44
+
+# Training parameters
+training:
+  learning_rates: [1.0e-5, 2.0e-5, 3.0e-5, 4.0e-5, 5.0e-5, 1.0e-4, 3.0e-4, 5.0e-4]
+  batch_sizes: [16, 32]
+  max_epochs: 30
