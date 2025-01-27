@@ -37,10 +37,15 @@ def parse_args():
 
     return args
 
+
 def load_config(dataset_name: str):
-    config_path = Path(f"configs/pos/{dataset_name}.yaml")
+    # On obtient le chemin absolu du répertoire du script
+    script_dir = Path(__file__).parent  # donne le chemin vers fine_tuning/
+    project_root = script_dir.parent  # remonte au répertoire Projet-MLA/
+    config_path = project_root / "configs" / "pos" / f"{dataset_name}.yaml"
+
     if not config_path.exists():
-        raise FileNotFoundError(f"Configuration file not found for dataset: {dataset_name}")
+        raise FileNotFoundError(f"Configuration file not found for dataset: {dataset_name} at {config_path}")
 
     with open(config_path) as f:
         return yaml.safe_load(f)
